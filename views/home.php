@@ -27,8 +27,8 @@
 
 <div class="choices <?php if ($share) echo 'hidden' ?>">
 	<h1 class="title"><a href="<?php echo $app->urlFor('home') ?>"><?php echo $rand[0]; ?></a></h1>
-	<a href="<?php echo $app->urlFor('jarretededeprimer') ?>" class="reader-choice sad"><?php echo $rand[1]; ?></a>
-	<a href="<?php echo $app->urlFor('cayestjedeprimeplus') ?>" class="reader-choice happy"><?php echo $rand[2]; ?></a>
+	<a href="<?php echo !empty($nextImgSlug) ? $app->urlFor('jarretededeprimer', array('slug' => $nextImgSlug)) : $app->urlFor('jarretededeprimer-empty') ?>" class="reader-choice sad"><?php echo $rand[1]; ?></a>
+	<a href="<?php echo !empty($img) ? $app->urlFor('cayestjedeprimeplus', array('slug' => $img['slug'])) : $app->urlFor('cayestjedeprimeplus-empty') ?>" class="reader-choice happy"><?php echo $rand[2]; ?></a>
 </div>
 <div class="share <?php if (!$share) echo 'hidden' ?>">
 	<h1 class="title">Alors dis-le !</h1>
@@ -44,7 +44,7 @@
 		);
 		$sharingSentence .= " ".$coolSharingSentences[mt_rand(0, count($coolSharingSentences)-1)];
 		if (!empty($img)) {
-			$sharingSentence .= " grâce à cette superbe image ".$img['src'];	
+			$sharingSentence .= " grâce à cette superbe image ".HOST.$app->urlFor('jarretededeprimer', array('slug' => $img['slug']));	
 		}
 		$sharingSentence .= " !";
 	?>
@@ -64,6 +64,6 @@
 	<div class="img-source"><a href="<?php echo $img['url'] ?>" target="_blank">source</a></div>
 	<?php endif ?>
 </div>
-<div class="hidden">
-<?php var_dump($img) ?>
-</div>
+<!-- <div class="hidden"> -->
+<?php //var_dump($img) ?>
+<!-- </div> -->

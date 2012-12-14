@@ -13,28 +13,15 @@
 	session_cache_limiter(false);
 	session_start();
 
-	$db = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME."", DB_USER, DB_PASSWORD);
-	$tumblrs = array(
-		'http://bonjourhamster.fr',
-		'http://dailybunny.tumblr.com',
-		'http://bonjourlesgeeks.com',
-		'http://bonjourhumour.tumblr.com',
-		'http://viktoria-f.tumblr.com'
-	);
-	$subreddits = array('funny', 'gif');
-	$imageDB = new ImageDatabase($db, array(
-		'tumblrs' => $tumblrs, 
-		'subreddits' => $subreddits, 
-		'imgurGallery' => true
-	));
+	$db = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME."", DB_USER, DB_PASSWORD, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
+	$imageDB = new ImageDatabase($db, realpath('sources.json'), 1);
 	$view = new LayoutedView();
 	$app = new \Slim\Slim(array(
 		'view' => $view,
 		'templates.path' => './views',
 		'debug' => true
 	));
-	define('ROOT', $app->request()->getRootUri());
-
+	define('HOST', strpos($app->request()->getHost(), 'http://') === false ? 'http://'.$app->request()->getHost() : $app->request()->getHost());
 
 	$app->hook('slim.before.dispatch', function() use ($app, $view) {
 		$app->view()->appendData(array(
@@ -46,24 +33,38 @@
 			$view::setLayout('layout.php');
 	});
 
-	$app->get('/', function () use ($app) {
+	$app->get('/', function () use ($app, $imageDB) {
 		$_SESSION['img'] = null;
-		$app->render('home.php', array('simpleText' => true));
+		$nextImgSlug = $imageDB->getRandomImageSlug();
+		$app->render('home.php', array('simpleText' => true, 'nextImgSlug' => $nextImgSlug));
 	})->name('home');
 
 	$app->get('/jarretededeprimer/', function() use ($app, $imageDB) {
-		$img = $_SESSION['img'] = $imageDB->getRandomImage();
-		$app->render('home.php', array('img' => $img));
+		$slug = $imageDB->getRandomImageSlug();
+		$app->redirect( $app->urlFor('jarretededeprimer'), array('slug' => $slug) );
+	})->name('jarretededeprimer-empty');
+
+	$app->get('/jarretededeprimer/:slug', function($slug) use ($app, $imageDB) {
+		$img = $_SESSION['img'] = $imageDB->getImageBySlug($slug);
+		$_SESSION['seen_img_ids'][]= $img['id'];
+		$nextImgSlug = $imageDB->getRandomImageSlug($_SESSION['seen_img_ids']);
+		$app->render('home.php', array('img' => $img, 'nextImgSlug' => $nextImgSlug));
 	})->name('jarretededeprimer');
 
 	$app->get('/cayestjedeprimeplus/', function() use ($app) {
 		$data = array('share' => true);
-		if (!empty($_SESSION['img'])) $data['img'] = $_SESSION['img'];
+		if (!empty($_SESSION['img']))
+			$app->redirect( $app->urlFor('cayestjedeprimeplus'), array('slug' => $imageDB->getImageSlugById($_SESSION['img']['id'])) );
+		$app->render('home.php', $data);
+	})->name('cayestjedeprimeplus-empty');
+
+	$app->get('/cayestjedeprimeplus/:slug', function($slug) use ($app, $imageDB) {
+		$data = array('share' => true, 'img' => $imageDB->getImageBySlug($slug));
 		$app->render('home.php', $data);
 	})->name('cayestjedeprimeplus');
 	
 	$app->get('/updateImages', function() use($imageDB) {
-		$imageDB->updateImages();
+		$imageDB->fillDB();
 	})->name('updateImages');
 
 	$app->run();

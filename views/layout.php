@@ -11,7 +11,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <!-- dev : /css/style.css -->
-        <link rel="stylesheet" href="/css/style.css?v=12s34567">
+        <link rel="stylesheet" href="/css/style.min.css?v=1234567">
     </head>
     <body>
 
@@ -19,21 +19,6 @@
             <p class="obsolete-browser">Vous utilisez un navigateur <strong>obsolète</strong>. <a href="http://browsehappy.com/">Mettez-le à jour</a> pour naviguer sur Internet de façon <strong>sécurisée</strong> !</p>
         <![endif]-->
 
-        <a href="#" id="options-toggler">Options</a>
-
-        <div id="options" class="invisible">
-            <form method=post>
-                <p>Que te faut-il pour arrêter de déprimer ?</p>
-                <ul>
-                    <li><label><input checked="checked" type="checkbox" name="category[]" value="animals">Des animaux</label></li>
-                    <li><label><input checked="checked" type="checkbox" name="category[]" value="fun">Du fun <span class="note">en anglais</span></label></li>
-                    <li><label><input checked="checked" type="checkbox" name="category[]" value="gifs">Des gifs <span class="note">là aussi, en anglais</span></label></li>
-                    <li><label><input type="checkbox" name="category[]" value="girls">Des madames</label></li>
-                    <li><label><input type="checkbox" name="category[]" value="guys">Des monsieurs</label></li>
-                </ul>
-                <button>Valider</button>
-            </form>
-        </div>
         <div id="content">
         <?php echo $content_for_layout ?> 
         </div>
@@ -47,6 +32,6 @@
             s.parentNode.insertBefore(g,s)}(document,'script'));
         </script>
         <!-- dev : /js/script.js -->
-        <!--[if gte IE 8]><!--> <script src="/js/script.js?v=z54321"></script> <!--<![endif]-->
+        <!--[if gte IE 8]><!--> <script src="/js/script.min.js?v=54321"></script> <!--<![endif]-->
     </body>
 </html>
