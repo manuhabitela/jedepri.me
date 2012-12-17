@@ -39,29 +39,29 @@
 		$app->render('home.php', array('simpleText' => true, 'nextImgSlug' => $nextImgSlug));
 	})->name('home');
 
-	$app->get('/jarretededeprimer/', function() use ($app, $imageDB) {
-		$slug = $imageDB->getRandomImageSlug();
-		$app->redirect( $app->urlFor('jarretededeprimer'), array('slug' => $slug) );
-	})->name('jarretededeprimer-empty');
-
 	$app->get('/jarretededeprimer/:slug', function($slug) use ($app, $imageDB) {
 		$img = $_SESSION['img'] = $imageDB->getImageBySlug($slug);
-		$_SESSION['seen_img_ids'][]= $img['id'];
+		if (empty($_SESSION['seen_img_ids']) || !in_array($img['id'], $_SESSION['seen_img_ids']))
+			$_SESSION['seen_img_ids'][]= $img['id'];
 		$nextImgSlug = $imageDB->getRandomImageSlug($_SESSION['seen_img_ids']);
 		$app->render('home.php', array('img' => $img, 'nextImgSlug' => $nextImgSlug));
 	})->name('jarretededeprimer');
 
-	$app->get('/cayestjedeprimeplus/', function() use ($app) {
-		$data = array('share' => true);
-		if (!empty($_SESSION['img']))
-			$app->redirect( $app->urlFor('cayestjedeprimeplus'), array('slug' => $imageDB->getImageSlugById($_SESSION['img']['id'])) );
-		$app->render('home.php', $data);
-	})->name('cayestjedeprimeplus-empty');
+	$app->get('/jarretededeprimer/', function() use ($app, $imageDB) {
+		$app->redirect('/jarretededeprimer/'.$imageDB->getRandomImageSlug());
+	})->name('jarretededeprimer-empty');
 
 	$app->get('/cayestjedeprimeplus/:slug', function($slug) use ($app, $imageDB) {
 		$data = array('share' => true, 'img' => $imageDB->getImageBySlug($slug));
 		$app->render('home.php', $data);
 	})->name('cayestjedeprimeplus');
+
+	$app->get('/cayestjedeprimeplus/', function() use ($app, $imageDB) {
+		$data = array('share' => true);
+		if (!empty($_SESSION['img']))
+			$app->redirect('/cayestjedeprimeplus/'.$imageDB->getImageSlugById($_SESSION['img']['id']));
+		$app->render('home.php', $data);
+	})->name('cayestjedeprimeplus-empty');
 	
 	$app->get('/updateImages', function() use($imageDB) {
 		$imageDB->fillDB();

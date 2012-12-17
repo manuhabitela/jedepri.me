@@ -25,11 +25,22 @@
 	$rand = $strings[mt_rand(0, count($strings)-1)];
 ?>
 
+<div id="img">
+	<?php if (!empty($img)): ?>
+	<p class="img-caption">
+	<?php if ((strpos($img['src'], 'imgur') !== false || $img['type'] == 'tumblr-regular') && !empty($img['title'])) echo $img['title'] ?>
+	&nbsp;<span class="img-source"><a href="<?php echo $img['url'] ?>" target="_blank">(source)</a></span></p>
+	<img class="img" src="<?php echo $img['src'] ?>" alt="<?php echo $img['title'] ?>">
+	
+	<?php endif ?>
+</div>
+
 <div class="choices <?php if ($share) echo 'hidden' ?>">
 	<h1 class="title"><a href="<?php echo $app->urlFor('home') ?>"><?php echo $rand[0]; ?></a></h1>
 	<a href="<?php echo !empty($nextImgSlug) ? $app->urlFor('jarretededeprimer', array('slug' => $nextImgSlug)) : $app->urlFor('jarretededeprimer-empty') ?>" class="reader-choice sad"><?php echo $rand[1]; ?></a>
 	<a href="<?php echo !empty($img) ? $app->urlFor('cayestjedeprimeplus', array('slug' => $img['slug'])) : $app->urlFor('cayestjedeprimeplus-empty') ?>" class="reader-choice happy"><?php echo $rand[2]; ?></a>
 </div>
+
 <div class="share <?php if (!$share) echo 'hidden' ?>">
 	<h1 class="title">Alors dis-le !</h1>
 	<?php 
@@ -44,7 +55,7 @@
 		);
 		$sharingSentence .= " ".$coolSharingSentences[mt_rand(0, count($coolSharingSentences)-1)];
 		if (!empty($img)) {
-			$sharingSentence .= " grâce à cette superbe image ".HOST.$app->urlFor('jarretededeprimer', array('slug' => $img['slug']));	
+			$sharingSentence .= " grâce à ".HOST.$app->urlFor('jarretededeprimer', array('slug' => $img['slug']));	
 		}
 		$sharingSentence .= " !";
 	?>
@@ -54,15 +65,6 @@
 	</form>
 
 	<a href="<?php echo $app->urlFor('home') ?>" class="toggle-view">Retour</a>
-</div>
-<div id="img">
-	<?php if (!empty($img)): ?>
-	<?php if (strpos($img['src'], 'imgur') !== false && !empty($img['title'])): ?>
-	<p class="img-caption"><?php echo $img['title'] ?></p>
-	<?php endif ?>
-	<img class="img" src="<?php echo $img['src'] ?>" alt="<?php echo $img['title'] ?>">
-	<div class="img-source"><a href="<?php echo $img['url'] ?>" target="_blank">source</a></div>
-	<?php endif ?>
 </div>
 <!-- <div class="hidden"> -->
 <?php //var_dump($img) ?>

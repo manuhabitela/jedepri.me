@@ -2,14 +2,15 @@
 /**
  * classe s'occupant de gérer en base de données les liens vers les images à utiliser sur jedepri.me
  *
- * on passe en paramètre un fichier json contenant les sources à utiliser, classés par type, ex:
+ * on passe en paramètre un fichier json contenant les sources à utiliser, classées par type, et disposant d'un poids, ex:
  * {
- * 	 "tumblr-photo": ["http://bonjourhamster.fr", "http://dailybunny.tumblr.com"],
- *   "subreddit": ["funny"]
+ * 	 "tumblr-photo": [{"http://bonjourhamster.fr": 10}, {"http://dailybunny.tumblr.com": 20}],
+ *   "subreddit": [{"funny": 50}]
  * }
  *
  * les types possibles sont actuellement : 
- * 		"tumblr-photo" pour des sites tumblr bien structurés (avec des posts de type photo et non des images mises dans un article texte)
+ * 		"tumblr-nomdutype" pour des sites tumblr. Si on veut ajouter un tumblr postant des photos, on note "tumblr-photo"
+ * 			pour un tumblr avec des posts normaux, ca sera "tumblr-regular", etc... les types suivent les nom de l'api
  * 			c'est les urls des tumblr qu'on ajoute dans ce tableau
  * 		"subreddit" pour des images provenant d'un subreddit
  * 			c'est les noms des subreddit qu'on ajoute dans ce tableau
@@ -40,6 +41,7 @@ class ImageDatabase {
 	 */
 	protected static $sourceTypeMethods = array(
 		'tumblr-photo' => '_insertTumblr',
+		'tumblr-regular' => '_insertTumblr',
 		'subreddit' => '_insertSubreddit',
 		'imgur-search' => '_insertImgurFilteredGallery'
 	);
@@ -62,8 +64,9 @@ class ImageDatabase {
 			foreach ($this->sources as $type => $sources) {
 				if ($givenType == null || $type == $givenType) {
 					foreach ($sources as $source) {
+						$source = key($source);
 						if (method_exists($this, $methods[$type]))
-							$this->{$methods[$type]}($source);
+							$this->{$methods[$type]}($source, $type);
 					}
 				}
 			}
@@ -93,19 +96,39 @@ class ImageDatabase {
 
 	/**
 	 * choppe une image au pif dans la base
-	 * @param  array  $not tableau d'ids a éviter de récupérer
+	 * @param  array  $options
+	 *         			"select" : champs a selectionner, tout par défaut ("*")
+	 *         			"except" : tableau d'ids à ne pas intégrer dans la recherche d'image
+	 *         			"exceptSources" : tableau de [type, source] à ne pas intégrer dans la recherce d'image
+	 *         			"weighted": est-ce qu'on prend en compte le poids des sources ? oui par défaut
 	 * @return array      image
 	 */
 	public function getRandomImage($options) {
-		$query = 'SELECT ';
-		$query .= empty($options['select']) ? "*" : $options['select'];
-		$query .= ' from jedeprime_imgs';
+		//print_r($options);
+		$options = $options + array('select' => "*", 'except' => array(), 'exceptSources' => array(), 'weighted' => true);
+		$query = 'SELECT '.$options['select'].' from jedeprime_imgs WHERE 1=1';
 		if (!empty($options['except']))
-			$query .= " WHERE id NOT IN (".implode(', ', $options['except']).")";
+			$query .= " AND id NOT IN (".implode(', ', $options['except']).")";
+		if ($options['weighted']) {
+			$filter = $this->_getNotSoRandomSource($options['exceptSources']);
+			$query .= " AND type = \"".addslashes($filter['type'])."\" AND source = \"".addslashes($filter['source'])."\"";
+		}
 		$query .= " ORDER BY RAND() LIMIT 0,1";
 		$data = $this->db->query($query);
-		if ($data && $data = $data->fetch(PDO::FETCH_BOTH)) {
-			return $this->_image($data);
+		if ($data) {
+			$image = $data->fetch(PDO::FETCH_BOTH);
+			if ($image)
+				return $this->_image($image);
+			else { //aucune image trouvée
+				if (!empty($filter)) { //on tente d'en trouver une avec un filtre sur type/source en moins
+					$options['exceptSources'][] = $filter;
+					$image = $this->getRandomImage($options);
+					if ($image)
+						return $image;
+					else //si même avec un filtre en moins ça passe pas, on prend un truc totalement au pif
+						return $this->getRandomImage();
+				}
+			}
 		}
 		return false;
 	}
@@ -119,6 +142,35 @@ class ImageDatabase {
 	public function getRandomImageSlug($not = array()) {
 		$id = $this->getRandomImageId($not);
 		if ($id) return $this->getImageSlugById($id);
+		return false;
+	}
+
+	/**
+	 * UGGLLLYYYY
+	 * chope une source au pif dans la liste de sources
+	 * on prend en compte le "poids" de chaque source
+	 * @param array not tableau de [type, source] sur lesquels on ne veut pas tomber
+	 * @return array [type, source]
+	 */
+	protected function _getNotSoRandomSource($not = array()) {
+		$totalWeight = 0;
+		$weightRanges = array();
+		foreach ($this->sources as $type => $sources) {
+			foreach ($sources as $sourceArray) {
+				$source = key($sourceArray);
+				//on ne prend pas en compte cette source si elle est dans le tableau $not
+				if (!empty($not) && in_array( array('type' => $type, 'source' => $source), $not ))
+					continue;
+				$weight = $sourceArray[$source];
+				$totalWeight += $weight;
+				$weightRanges[$type.'|'.$source]= $totalWeight;
+			}
+		}
+		$rand = mt_rand(0, $totalWeight);
+		foreach ($weightRanges as $source => $weight) {
+			if ($rand < $weight)
+				return array('type' => strstr($source, '|', true), 'source' => substr(strstr($source, '|'), 1));
+		}
 		return false;
 	}
 
@@ -147,12 +199,20 @@ class ImageDatabase {
 	 * @return array tableau représentant l'image ayant une 'src', une 'url', un 'title', et le 'xml'
 	 */
 	protected function _tumblrImage($xml) {
-		return array(
-			"src" => (string) $xml->{'photo-url'}[1],
+		$image = array(
 			"url" => (string) $xml['url'],
-			"title" => strip_tags((string) $xml->{'photo-caption'}),
 			"xml" => $xml->asXML()
 		);
+		if ($xml['type'] == 'photo') {
+			$image['src'] = (string) $xml->{'photo-url'}[1];
+			$image['title'] = strip_tags((string) $xml->{'photo-caption'});
+		}
+		if ($xml['type'] == 'regular') {
+			preg_match('/<p><img.+src="(.+)"\/><\/p>/s', html_entity_decode($xml->{'regular-body'}), $src); // A LA CRADE OUAIS
+			$image['src'] = $src[1];
+			$image['title'] = (string) $xml->{'regular-title'};
+		}
+		return !empty($image['src']) ? $image : false;
 	}
 
 	/**
@@ -206,13 +266,15 @@ class ImageDatabase {
 	 */
 	protected function _insertImages($imgs) {
 		if (empty($this->ids)) $this->ids = $this->_getImageIds();
-		$query = "INSERT INTO jedeprime_imgs(src, url, title, type, xml) VALUES ";
+		$query = "INSERT INTO jedeprime_imgs(src, url, title, type, source) VALUES ";
 		$queryValues = array();
 		foreach ($imgs as $img) {
-			if (!in_array($img['src'], $this->ids))
-				$queryValues[]= '("'.addslashes($img['src']).'", "'.addslashes($img['url']).'", "'.addslashes($img['title']).'", "'.addslashes($img['type']).'", "'.addslashes($img['xml']).'")';
+			if (!empty($img['src']) && !in_array($img['src'], $this->ids))
+				$queryValues[]= '("'.addslashes($img['src']).'", "'.addslashes($img['url']).'", "'.addslashes($img['title']).'", "'.addslashes($img['type']).'", "'.addslashes($img['source']).'")';
 		}
-		$query = $query.implode(', ', $queryValues)." ON DUPLICATE KEY UPDATE src=src";
+		if (empty($queryValues))
+			return false;
+		$query = $query.implode(', ', $queryValues)." ON DUPLICATE KEY UPDATE src=src;";
 		return $this->db->exec($query);
 	}
 
@@ -221,20 +283,26 @@ class ImageDatabase {
 	 * @param  string $tumblr url du tumblr dont on veut choper les images
 	 * @return int nombre d'images insérées
 	 */
-	protected function _insertTumblr($tumblr) {
+	protected function _insertTumblr($tumblr, $type) {
+		$tumblrType = substr(strstr($type, '-'), 1);
 		$max = 300;
 		$num = 50;
 		//avec les tumblr on passe par yql, ça semble mieux passer qu'en direct, bizarrement...
 		$checkMax = @simplexml_load_file("http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20xml%20where%20url%3D'".urlencode($tumblr.'/api/read?num=1')."'");
-		if ($checkMax) $max = $checkMax->results->tumblr->posts['total']; //download allll the posts
-		$pages = floor($max/$num) > 11 ? 11 : floor($max/$num);
-
+		if ($checkMax) $max = (int) $checkMax->results->tumblr->posts['total']; //download allll the posts
+		$pages = floor($max/$num) > 10 ? 10 : floor($max/$num);
+		if ($max < $num && $pages == 0) {
+			$pages = 1;
+			$num = $max;
+		}
 		$imgs = array();
 		for ($i=0; $i < $pages; $i++) {
-			$xml = @simplexml_load_file("http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20xml%20where%20url%3D'".urlencode($tumblr.'/api/read?start='.($i*50).'&num='.$num.'&type=photo')."'");
+			$xml = @simplexml_load_file("http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20xml%20where%20url%3D'".urlencode($tumblr.'/api/read?start='.($i*$num).'&num='.$num.'&type='.$tumblrType)."'");
 			if (!empty($xml->results->tumblr->posts)) {
 				foreach ($xml->results->tumblr->posts->children() as $item) {
-					$imgs[] = $this->_tumblrImage($item) + array('type' => 'tumblr-photo');
+					$img = $this->_tumblrImage($item);
+					if ($img)
+						$imgs[] = $img + array('type' => $type, 'source' => $tumblr);
 				}
 			}
 		}
@@ -246,13 +314,13 @@ class ImageDatabase {
 	 * @param  string $subreddit nom du subreddit dont on veut choper les images
 	 * @return int nombre d'images insérées
 	 */
-	protected function _insertSubreddit($subreddit) {
+	protected function _insertSubreddit($subreddit, $type) {
 		$imgs = array();
-		for ($i=0; $i < 11; $i++) {
+		for ($i=0; $i < 10; $i++) {
 			$xml = @simplexml_load_file('http://imgur.com/r/'.$subreddit.'/top/page/'.$i.'.xml');
 			if ($xml) {
 				foreach ($xml->item as $item) {
-					$imgs[]= $this->_imgurImage($item) + array('type' => 'subreddit');
+					$imgs[]= $this->_imgurImage($item) + array('type' => $type, 'source' => $subreddit);
 				}
 			}
 		}
@@ -264,13 +332,13 @@ class ImageDatabase {
 	 * @param  string $keyword mot(s) clé de la recherche qu'on fait sur imgur
 	 * @return int nombre d'images insérées
 	 */
-	protected function _insertImgurFilteredGallery($keyword) {
+	protected function _insertImgurFilteredGallery($keyword, $type) {
 		$imgs = array();
-		for ($i=0; $i < 11; $i++) {
+		for ($i=0; $i < 3; $i++) {
 			$xml = @simplexml_load_file('http://imgur.com/gallery/page/'.$i.'.xml?q='.str_replace(' ', '+', $keyword));
 			if ($xml) {
 				foreach ($xml->item as $item) {
-					$imgs[]= $this->_imgurImage($item) + array('type' => 'imgur-search');
+					$imgs[]= $this->_imgurImage($item) + array('type' => $type, 'source' => $keyword);
 				}
 			}
 		}

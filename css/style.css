@@ -160,7 +160,6 @@ a:active {
 	width: auto;
 	max-width: 500px;
 	margin: 20px auto;
-	padding-top: 20px;
 }
 
 .img {
@@ -171,11 +170,17 @@ a:active {
 
 .img-caption, .img-source a {
 	font-style: italic;
-	color: #444;
+}
+
+.img-caption {
+	margin-bottom: 0;
+	color: #222;
+	font-size: 1.1em;
 }
 
 .img-source a {
 	color: #888;
+	font-size: .8em;
 }
 
 a.reader-choice {
