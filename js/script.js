@@ -137,15 +137,6 @@
 		}
 
 		if ( target && target.nodeName === 'A' && hasClass(target, 'toggle-view') ) {
-			//if (hasClass($('.choices'), 'hidden')) {
-			//	removeClass($('.choices'), 'hidden');
-			//	addClass($('.share'), 'hidden');
-			//	if (H) history.pushState(null, document.title, $('a.reader-choice.sad').href);
-			//} else {
-			//	addClass($('.choices'), 'hidden');
-			//	removeClass($('.share'), 'hidden');
-			//	if (H) history.pushState(null, document.title, $('a.reader-choice.happy').href);
-			//}
 			window.history.go(-1);
 			if (event.preventDefault) event.preventDefault(); else event.returnValue = false;
 		}
@@ -166,14 +157,5 @@
 		typed.push(e.keyCode);
 		if (typed.toString() == wat.toString())
 			zomthng();
-	});
-
-	addEvent($('#options-toggler'), 'click', function(e) {
-		if (hasClass($('#options'), 'invisible')) {
-			removeClass($('#options'), 'invisible');
-		} else {
-			addClass($('#options'), 'invisible');
-		}
-		if (event.preventDefault) event.preventDefault(); else event.returnValue = false;
 	});
 //})();

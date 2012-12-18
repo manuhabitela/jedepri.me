@@ -9,6 +9,6 @@
             s.parentNode.insertBefore(g,s)}(document,'script'));
         </script>
         <!-- dev : /js/script.js -->
-        <!--[if gte IE 8]><!--> <script src="/js/script.min.js?v=58975643"></script> <!--<![endif]-->
+        <!--[if gte IE 8]><!--> <script src="/js/script.min.js?v=589756434"></script> <!--<![endif]-->
     </body>
 </html>
