@@ -6,7 +6,7 @@
 	
 	require 'php/Slim/Slim.php';
 	\Slim\Slim::registerAutoloader();
-	require 'php/LayoutedView.php';
+	// require 'php/LayoutedView.php';
 	require 'php/config.php';
 	require 'php/ImageDatabase.php';
 
@@ -15,9 +15,8 @@
 
 	$db = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME."", DB_USER, DB_PASSWORD, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
 	$imageDB = new ImageDatabase($db, realpath('sources.json'), 1);
-	$view = new LayoutedView();
+	// $view = new LayoutedView();
 	$app = new \Slim\Slim(array(
-		'view' => $view,
 		'templates.path' => './views',
 		'debug' => true
 	));
@@ -27,10 +26,10 @@
 		$app->view()->appendData(array(
 			'app' => $app
 		));
-		if ($app->request()->isAjax())
-			$view::setLayout();
-		else
-			$view::setLayout('layout.php');
+		// if ($app->request()->isAjax())
+		// 	$view::setLayout();
+		// else
+		// 	$view::setLayout('layout.php');
 	});
 
 	$app->get('/', function () use ($app, $imageDB) {
@@ -50,6 +49,10 @@
 	$app->get('/jarretededeprimer/', function() use ($app, $imageDB) {
 		$app->redirect('/jarretededeprimer/'.$imageDB->getRandomImageSlug());
 	})->name('jarretededeprimer-empty');
+
+	$app->get('/random', function() use ($app, $imageDB) {
+		echo HOST.'/jarretededeprimer/'.$imageDB->getRandomImageSlug();
+	});
 
 	$app->get('/cayestjedeprimeplus/:slug', function($slug) use ($app, $imageDB) {
 		$data = array('share' => true, 'img' => $imageDB->getImageBySlug($slug));

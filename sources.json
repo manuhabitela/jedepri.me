@@ -13,8 +13,9 @@
 		{ "http://quandmonchat.tumblr.com": 60 }
 	],
 	"subreddit": [
-		{ "funny": 80 },
-		{ "gif": 100 }
+		{ "funny": 70 },
+		{ "gif": 100 },
+		{ "aww": 70 }
 	],
 	"imgur-search": [
 		{ "hug": 50 }

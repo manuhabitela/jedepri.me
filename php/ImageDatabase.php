@@ -103,7 +103,7 @@ class ImageDatabase {
 	 *         			"weighted": est-ce qu'on prend en compte le poids des sources ? oui par défaut
 	 * @return array      image
 	 */
-	public function getRandomImage($options) {
+	public function getRandomImage($options = array()) {
 		//print_r($options);
 		$options = $options + array('select' => "*", 'except' => array(), 'exceptSources' => array(), 'weighted' => true);
 		$query = 'SELECT '.$options['select'].' from jedeprime_imgs WHERE 1=1';

@@ -1,3 +1,5 @@
+<?php //le templating à la méthode RACHE
+if (!$app->request()->isAjax()) include('head.php'); ?>
 <?php
 	if (!isset($simpleText)) $simpleText = false;
 	if (!isset($share)) $share = false;
@@ -28,8 +30,7 @@
 <div id="img">
 	<?php if (!empty($img)): ?>
 	<p class="img-caption">
-	<?php if ((strpos($img['src'], 'imgur') !== false || $img['type'] == 'tumblr-regular') && !empty($img['title'])) echo $img['title'] ?>
-	&nbsp;<span class="img-source"><a href="<?php echo $img['url'] ?>" target="_blank">(source)</a></span></p>
+	<?php if ((strpos($img['src'], 'imgur') !== false || $img['type'] == 'tumblr-regular') && !empty($img['title'])) echo $img['title'] ?> <span class="img-source"><a href="<?php echo $img['url'] ?>" target="_blank">(source)</a></span></p>
 	<img class="img" src="<?php echo $img['src'] ?>" alt="<?php echo $img['title'] ?>">
 	
 	<?php endif ?>
@@ -69,3 +70,4 @@
 <!-- <div class="hidden"> -->
 <?php //var_dump($img) ?>
 <!-- </div> -->
+<?php if (!$app->request()->isAjax()) include('foot.php'); ?>
