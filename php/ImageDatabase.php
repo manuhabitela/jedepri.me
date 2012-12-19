@@ -104,11 +104,10 @@ class ImageDatabase {
 	 * @return array      image
 	 */
 	public function getRandomImage($options = array()) {
-		//print_r($options);
 		$options = $options + array('select' => "*", 'except' => array(), 'exceptSources' => array(), 'weighted' => true);
 		$query = 'SELECT '.$options['select'].' from jedeprime_imgs WHERE 1=1';
 		if (!empty($options['except']))
-			$query .= " AND id NOT IN (".implode(', ', $options['except']).")";
+			$query .= " AND id NOT IN (".implode(', ', array_filter($options['except'])).")";
 		if ($options['weighted']) {
 			$filter = $this->_getNotSoRandomSource($options['exceptSources']);
 			$query .= " AND type = \"".addslashes($filter['type'])."\" AND source = \"".addslashes($filter['source'])."\"";
@@ -123,11 +122,11 @@ class ImageDatabase {
 				if (!empty($filter)) { //on tente d'en trouver une avec un filtre sur type/source en moins
 					$options['exceptSources'][] = $filter;
 					$image = $this->getRandomImage($options);
-					if ($image)
-						return $image;
-					else //si même avec un filtre en moins ça passe pas, on prend un truc totalement au pif
-						return $this->getRandomImage();
 				}
+				if ($image)
+					return $image;
+				else //si même avec un filtre en moins ça passe pas, on prend un truc totalement au pif
+					return $this->getRandomImage();
 			}
 		}
 		return false;
