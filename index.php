@@ -29,7 +29,7 @@
 		));
 	});
 
-	$app->get('/', function () use ($app, $imageDB) {
+	$app->get('/', function() use ($app, $imageDB) {
 		$_SESSION['img'] = null;
 		$nextImgSlug = $imageDB->getRandomImageSlug();
 		$app->render('home.php', array('simpleText' => true, 'nextImgSlug' => $nextImgSlug));
@@ -47,10 +47,6 @@
 		$app->redirect('/jarretededeprimer/'.$imageDB->getRandomImageSlug());
 	})->name('jarretededeprimer-empty');
 
-	$app->get('/random', function() use ($app, $imageDB) {
-		echo HOST.'/jarretededeprimer/'.$imageDB->getRandomImageSlug();
-	});
-
 	$app->get('/cayestjedeprimeplus/:slug', function($slug) use ($app, $imageDB) {
 		$data = array('share' => true, 'img' => $imageDB->getImageBySlug($slug));
 		$app->render('home.php', $data);
@@ -66,6 +62,14 @@
 	$app->get('/updateImages', function() use($imageDB) {
 		$imageDB->fillDB();
 	})->name('updateImages');
+
+	$app->get('/random', function() use ($app, $imageDB) {
+		echo HOST.'/jarretededeprimer/'.$imageDB->getRandomImageSlug();
+	});
+
+	$app->get('/:slug', function($slug) use($app) {
+		$app->redirect('/jarretededeprimer/'.$slug, 301);
+	});
 
 	$app->run();
 ?>
