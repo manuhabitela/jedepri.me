@@ -70,7 +70,7 @@ body {
 	margin: 0 auto;
 	width: auto;
 	/*min-height: 100%;*/
-	background: #f1f1f1 url(../img/noise.png) repeat top left;
+	background: #f1f1f1 none repeat top left;
 	text-rendering: optimizeLegibility;
 	position: relative;
 }
@@ -108,47 +108,6 @@ a:active {
 
 .title a {
 	color: inherit;
-}
-
-#options-toggler {
-	position: absolute;
-	top: 5px;
-	right: 5px;
-	z-index: 15;
-}
-
-#options {
-	position: relative;
-	z-index: 10;
-	background: #f5f5f5;
-	background: rgba(125, 125, 125, 0.1);
-	height: auto;
-	max-height: 500px;
-	overflow: hidden;
-	-webkit-transition: all 0.75s linear;
-	-moz-transition: all 0.75s linear;
-	-ms-transition: all 0.75s linear;
-	-o-transition: all 0.75s linear;
-	transition: all 0.75s linear;
-}
-
-#options form {
-	padding: 20px;
-	border-bottom: 1px solid #ccc;
-}
-
-#options.invisible {
-	max-height: 0;
-}
-
-#options p {
-	margin-top: 0;
-}
-
-#options ul {
-	margin: 0;
-	padding: 0;
-	list-style-type: none;
 }
 
 #content {
@@ -193,7 +152,7 @@ a.reader-choice {
 }
 
 
-a.reader-choice.sad {
+a.sad {
 	color: #aaa;
 	text-shadow: 0 1px 0 rgba(125, 125, 125, 1.0), 0 -1px 0 rgba(255, 255, 255, 1.0);
 	-webkit-transition: all 0.75s linear;
@@ -203,12 +162,12 @@ a.reader-choice.sad {
 	transition: all 0.75s linear;
 }
 
-a.reader-choice.happy {
+a.happy {
 	color: #00C410;
 	text-shadow: 0 1px 0 rgba(0, 150, 40, 1.0), 0 -1px 0 rgba(255, 255, 255, 1.0);
 }
 
-a.reader-choice.sad:hover {
+a.sad:hover, a.sad:focus {
 	background: black;
 	color: white;
 	text-shadow: none;
@@ -243,7 +202,7 @@ a.reader-choice.sad:hover {
 	to { background-color: #9C29E9; }
 }
 
-a.reader-choice.happy:hover {
+a.happy:hover, a.happy:focus {
 	-webkit-animation: coolcoolcool 0.5s infinite;
 	-moz-animation: coolcoolcool 0.5s infinite;
 	-o-animation: coolcoolcool 0.5s infinite;
@@ -270,16 +229,16 @@ a.reader-choice.happy:hover {
 
 .share-link.facebook {
 	color: white;
-	background: #5a74a7;
+	background: #3c6bce;
 }
 
 .share-text {
 	width: 500px;
 	max-width: 100%;
 	min-height: 100px;
-	font-family: Georgia, serif;
-	font-size: 1.2em;
-	font-style: italic;
+	font-family: sans-serif;
+	line-height: 1.5;
+	font-size: .9em;
 }
 
 #konami {
@@ -289,12 +248,22 @@ a.reader-choice.happy:hover {
 	color: #bbb;
 }
 
+@media (min-width: 641px) {
+	body {
+		background-image: url(../img/noise.png);
+	}
+}
+
 @media (max-width: 640px) {
 	body, #img, #img .img, .share-text {
 		width: auto;
 		max-width: 100%;
 		margin: 0;
 		padding: 0;
+	}
+
+	#img .img {
+		margin: 10px 0;
 	}
 
 	img {
@@ -306,14 +275,34 @@ a.reader-choice.happy:hover {
 
 	.title {
 		font-size: 2em;
+		margin: 1em 0;
 	}
 
-	a.reader-choice {
+	a.reader-choice, a.reader-choice:hover, a.reader-choice:focus {
 		display: block;
-		margin: 1em 0;
-		padding: 0.5em 0;
+		margin: 2em 1em;
+		padding: 0.75em 0;
 		font-size: 1.2em;
-		border-radius: 0;
+		border-radius: 10px;
+		-webkit-animation: none;
+		-moz-animation: none;
+		-o-animation: none;
+		animation: none;
+		-webkit-transition: none;
+		-moz-transition: none;
+		-ms-transition: none;
+		-o-transition: none;
+		transition: none;
+		color: white;
+		text-shadow: none;
+	}
+
+	a.sad {
+		background: #000;
+	}
+
+	a.happy {
+		background: #00C410;
 	}
 
 	.share-text {
