@@ -6,12 +6,15 @@
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-		<title>Je déprime mais je veux arrêter, je suis en pleine dépression et ça m'emmerde : heureusement, jedepri.me est là</title>
+		<title><?php echo !empty($img['src']) ? "Une image qui fait arrêter de déprimer - Je déprime" : "Je déprime mais je veux arrêter, je suis en pleine dépression et ça m'emmerde : heureusement, jedepri.me est là" ?></title>
 		<meta name="description" content="Un petit coup de déprime ? Allez viens.">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 		<!-- dev : /css/style.css -->
-		<link rel="stylesheet" href="/css/style.min.css?v=123456789">
+		<link rel="stylesheet" href="/css/style.min.css?v=9874562">
+
+		<?php $canonical = HOST.(!empty($img) ? $app->urlFor('jarretededeprimer', array('slug' => $img['slug'])) : '') ?>
+		<link rel="canonical" href="<?php echo $canonical ?>">
 
 		<?php if (!empty($img) && exif_imagetype($img['src']) != IMAGETYPE_GIF): ?>
 		<meta name="twitter:card" content="photo">
