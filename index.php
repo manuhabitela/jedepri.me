@@ -11,12 +11,15 @@
 
 	session_cache_limiter(false);
 	session_start();
+	
+	if (empty($_SESSION['seen_img_ids']))
+		$_SESSION['seen_img_ids'] = array();
 
 	$db = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME."", DB_USER, DB_PASSWORD, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
-	$imageDB = new ImageDatabase($db, realpath('sources.json'), 1);
+	$imageDB = new ImageDatabase($db, realpath('sources.json'), 0);
 	$app = new \Slim\Slim(array(
 		'templates.path' => './views',
-		'debug' => true
+		'debug' => false
 	));
 	define('HOST', strpos($app->request()->getHost(), 'http://') === false ? 'http://'.$app->request()->getHost() : $app->request()->getHost());
 
@@ -34,7 +37,7 @@
 
 	$app->get('/jarretededeprimer/:slug', function($slug) use ($app, $imageDB) {
 		$img = $_SESSION['img'] = $imageDB->getImageBySlug($slug);
-		if (empty($_SESSION['seen_img_ids']) || !in_array($img['id'], $_SESSION['seen_img_ids']))
+		if (!in_array($img['id'], $_SESSION['seen_img_ids']))
 			$_SESSION['seen_img_ids'][]= $img['id'];
 		$nextImgSlug = $imageDB->getRandomImageSlug($_SESSION['seen_img_ids']);
 		$app->render('home.php', array('img' => $img, 'nextImgSlug' => $nextImgSlug));
