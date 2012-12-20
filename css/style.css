@@ -250,7 +250,7 @@ a.happy:hover, a.happy:focus {
 
 @media (min-width: 641px) {
 	body {
-		background-image: url(../img/noise.png);
+		background-image: url(../img/noise-100.png);
 	}
 }
 
