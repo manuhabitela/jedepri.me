@@ -3,6 +3,8 @@
 	 * ce code est amicalement sponsorisé par la méthode rache
 	 */
 	define('PROD', (!empty($_SERVER['SERVER_NAME']) && strpos($_SERVER['SERVER_NAME'], 'jedepri.me') !== false));
+	if (PROD)
+		error_reporting(0);
 	
 	require 'php/Slim/Slim.php';
 	\Slim\Slim::registerAutoloader();
@@ -16,10 +18,10 @@
 		$_SESSION['seen_img_ids'] = array();
 
 	$db = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME."", DB_USER, DB_PASSWORD, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
-	$imageDB = new ImageDatabase($db, realpath('sources.json'), 0);
+	$imageDB = new ImageDatabase($db, realpath('sources.json'), intval(!PROD));
 	$app = new \Slim\Slim(array(
 		'templates.path' => './views',
-		'debug' => false
+		'debug' => intval(!PROD)
 	));
 	define('HOST', strpos($app->request()->getHost(), 'http://') === false ? 'http://'.$app->request()->getHost() : $app->request()->getHost());
 
