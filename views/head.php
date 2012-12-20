@@ -11,7 +11,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 		<!-- dev : /css/style.css -->
-		<link rel="stylesheet" href="/css/style.min.css?v=98745612">
+		<link rel="stylesheet" href="/css/style.min.css?v=987456120">
 
 		<?php $canonical = HOST.(!empty($img) ? $app->urlFor('jarretededeprimer', array('slug' => $img['slug'])) : '') ?>
 		<link rel="canonical" href="<?php echo $canonical ?>">
