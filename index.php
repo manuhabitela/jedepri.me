@@ -25,7 +25,7 @@
 	));
 	define('HOST', strpos($app->request()->getHost(), 'http://') === false ? 'http://'.$app->request()->getHost() : $app->request()->getHost());
 
-	$app->hook('slim.before.dispatch', function() use ($app, $view) {
+	$app->hook('slim.before.dispatch', function() use ($app) {
 		$app->view()->appendData(array(
 			'app' => $app
 		));
