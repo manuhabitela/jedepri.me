@@ -63,8 +63,7 @@ class ImageDatabase {
 			$this->ids = $this->_getImageIds();
 			foreach ($this->sources as $type => $sources) {
 				if ($givenType == null || $type == $givenType) {
-					foreach ($sources as $source) {
-						$source = key($source);
+					foreach ($sources as $source => $weight) {
 						if (method_exists($this, $methods[$type]))
 							$this->{$methods[$type]}($source, $type);
 					}
@@ -155,12 +154,10 @@ class ImageDatabase {
 		$totalWeight = 0;
 		$weightRanges = array();
 		foreach ($this->sources as $type => $sources) {
-			foreach ($sources as $sourceArray) {
-				$source = key($sourceArray);
+			foreach ($sources as $source => $weight) {
 				//on ne prend pas en compte cette source si elle est dans le tableau $not
 				if (!empty($not) && in_array( array('type' => $type, 'source' => $source), $not ))
 					continue;
-				$weight = $sourceArray[$source];
 				$totalWeight += $weight;
 				$weightRanges[$type.'|'.$source]= $totalWeight;
 			}
