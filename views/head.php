@@ -6,8 +6,8 @@
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-		<title><?php echo !empty($img['src']) ? "Une image qui fait arrêter de déprimer - Je déprime" : "Je déprime mais je veux arrêter, je suis en pleine dépression et ça m'emmerde : heureusement, jedepri.me est là" ?></title>
-		<meta name="description" content="Un petit coup de déprime ? Allez viens.">
+		<title><?php echo !empty($img['src']) ? "Une image qui fait arrêter de déprimer - Je déprime" : APP_TITLE  ?></title>
+		<meta name="description" content="<?php echo APP_DESC ?>">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 		<!-- dev : /css/style.css -->

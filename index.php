@@ -6,10 +6,10 @@
 	if (PROD)
 		error_reporting(0);
 	
-	require 'php/Slim/Slim.php';
-	\Slim\Slim::registerAutoloader();
-	require 'php/config.php';
-	require 'php/ImageDatabase.php';
+	require 'config/app.php';
+	require 'config/database.php';
+	require 'vendor/autoload.php';
+	require 'lib/ImageDatabase.php';
 
 	session_cache_limiter(false);
 	session_start();
@@ -18,7 +18,7 @@
 		$_SESSION['seen_img_ids'] = array();
 
 	$db = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME."", DB_USER, DB_PASSWORD, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
-	$imageDB = new ImageDatabase($db, realpath('sources.json'), intval(!PROD));
+	$imageDB = new ImageDatabase($db, SOURCES_FILE, intval(!PROD));
 	$app = new \Slim\Slim(array(
 		'templates.path' => './views',
 		'debug' => intval(!PROD)
