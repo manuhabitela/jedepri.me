@@ -1,7 +1,7 @@
 /**
  * ce code est amicalement sponsorisé par la méthode rache
  */
-//;(function() {
+;(function() {
 	/* IE8+, le reste n'a pas de JS, on peut donc utiliser tranquille querySelector	*/
 	var $ = function(selector, el) {
 		if (!el) {el = document;}
@@ -158,4 +158,10 @@
 		if (typed.toString() == wat.toString())
 			zomthng();
 	});
-//})();
+
+	addEvent($('#content'), 'keydown', function(e) {
+		var target = e.target || e.srcElement;
+		if ( target && target.nodeName === 'TEXTAREA' && hasClass(target, 'share-text') )
+			$('.share-link.twitter').href = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(target.value);
+	});
+})();
