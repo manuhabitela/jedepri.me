@@ -17,7 +17,7 @@
 		'templates.path' => './views',
 		'debug' => intval(!PROD)
 	));
-	define('HOST', strpos($app->request()->getHost(), 'http://') === false ? 'http://'.$app->request()->getHost() : $app->request()->getHost());
+	define('HOST', $app->request()->getUrl());
 
 	$app->hook('slim.before.dispatch', function() use ($app) {
 		$app->view()->appendData(array(
