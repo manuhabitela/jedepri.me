@@ -9,6 +9,7 @@
             s.parentNode.insertBefore(g,s)}(document,'script'));
         </script>
         <!-- dev : /js/script.js -->
-        <!--[if gte IE 8]><!--> <script src="/js/script.min.js?v=589756434"></script> <!--<![endif]-->
+        <?php $js = PROD ? '/js/script.min.js?v=589756434' : '/js/script.js?v='.time() ?>
+        <!--[if gte IE 8]><!--> <script src="<?php echo $js ?>"></script> <!--<![endif]-->
     </body>
 </html>
