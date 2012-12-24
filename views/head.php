@@ -17,7 +17,7 @@
 		<?php $canonical = HOST.(!empty($img) ? $app->urlFor('jarretededeprimer', array('slug' => $img['slug'])) : '') ?>
 		<link rel="canonical" href="<?php echo $canonical ?>">
 
-		<?php if (!empty($img) && exif_imagetype($img['src']) != IMAGETYPE_GIF): ?>
+		<?php if (!empty($img) && $img['type'] !== 'vdm' && substr($img['src'], -4) !== '.gif'): ?>
 		<meta name="twitter:card" content="photo">
 		<meta name="twitter:image" content="<?php echo $img['src'] ?>">
 		<?php if ((strpos($img['src'], 'imgur') !== false || $img['type'] == 'tumblr-regular') && !empty($img['title'])): ?>

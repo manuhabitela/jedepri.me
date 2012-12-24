@@ -27,12 +27,13 @@ if (!$app->request()->isAjax()) include('head.php'); ?>
 	$rand = $strings[mt_rand(0, count($strings)-1)];
 ?>
 
-<div id="img">
+<div id="img" class="<?php echo !empty($img) ? $img['type'] : '' ?>">
 	<?php if (!empty($img)): ?>
 	<p class="img-caption">
-	<?php if ((strpos($img['src'], 'imgur') !== false || $img['type'] == 'tumblr-regular') && !empty($img['title'])) echo $img['title'] ?> <span class="img-source"><a href="<?php echo $img['url'] ?>" target="_blank">(source)</a></span></p>
-	<img class="img" src="<?php echo $img['src'] ?>" alt="<?php echo $img['title'] ?>">
-	
+	<?php if ($img['type'] !== 'tumblr-photo' && !empty($img['title'])) echo $img['title'] ?> <span class="img-source"><a href="<?php echo $img['url'] ?>" target="_blank">(source)</a></span></p>
+	<?php if ($img['type'] !== 'vdm'): ?>
+	<img class="img" src="<?php echo $img['src'] ?>" alt="<?php echo $img['title'] ?>">	
+	<?php endif ?>
 	<?php endif ?>
 </div>
 

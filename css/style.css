@@ -142,6 +142,17 @@ a:active {
 	font-size: .8em;
 }
 
+.vdm .img-caption {
+	padding: 8px;
+	background-color: #fff;
+	border-radius: 4px;
+	box-shadow: 0 1px 1px #dedede;
+	font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, sans-serif;
+	font-size: 13px;
+	font-style: normal;
+	line-height: 1.5em;
+}
+
 a.reader-choice {
 	font-size: 5em;
 	margin: 0 1em;

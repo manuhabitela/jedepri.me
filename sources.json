@@ -7,7 +7,7 @@
 		"http://viktoria-f.tumblr.com": 40,
 		"http://sexiestfoods.tumblr.com": 40,
 		"http://veganfoody.tumblr.com": 20,
-		"http://jedeprime.tumblr.com": 10
+		"http://jedeprime.tumblr.com": 60
 	},
 	"tumblr-regular": {
 		"http://quandmonchat.tumblr.com": 60
@@ -19,5 +19,8 @@
 	},
 	"imgur-search": {
 		"hug": 50
+	},
+	"vdm": {
+		"http://feeds.uri.lv/viedemerde": 20
 	}
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * classe s'occupant de gérer en base de données les liens vers les images à utiliser sur jedepri.me
+ * classe s'occupant de gérer en base de données les liens vers les images/citations/autre à utiliser sur jedepri.me
  *
  * on passe en paramètre un fichier json contenant les sources à utiliser, classées par type, et disposant d'un poids, ex:
  * {
@@ -19,13 +19,13 @@
  *
  * on peut ensuite enregistrer les liens vers ces images dans la base, ou récupérer des images de la base au hasard
  */
-class ImageDatabase {
+class JedeprimeItemDatabase {
 
 	/**
 	 * objet PDO représentant notre BDD
 	 * @var PDOObject
 	 */
-	protected $db;
+	public $db;
 
 	/**
 	 * liste des sources à utiliser pour remplir la base de données
@@ -43,7 +43,8 @@ class ImageDatabase {
 		'tumblr-photo' => '_insertTumblr',
 		'tumblr-regular' => '_insertTumblr',
 		'subreddit' => '_insertSubreddit',
-		'imgur-search' => '_insertImgurFilteredGallery'
+		'imgur-search' => '_insertImgurFilteredGallery',
+		'vdm' => '_insertVDM'
 	);
 
 	function __construct($pdo, $sourceFile, $debug = 0) {
@@ -60,7 +61,7 @@ class ImageDatabase {
 	public function fillDB($givenType = null) {
 		$methods = self::$sourceTypeMethods;
 		if ($this->_isUpdateOk() || $this->debug == 1) {
-			$this->ids = $this->_getImageIds();
+			$this->ids = $this->_getItemIds();
 			foreach ($this->sources as $type => $sources) {
 				if ($givenType == null || $type == $givenType) {
 					foreach ($sources as $source => $weight) {
@@ -75,36 +76,36 @@ class ImageDatabase {
 		}
 	}
 
-	public function getImageById($id) {
-		$query = 'SELECT * from jedeprime_imgs WHERE id = '.$id;
+	public function getItemById($id) {
+		$query = 'SELECT * from jedeprime_items WHERE id = '.$id;
 		$data = $this->db->query($query);
 		if ($data && $data = $data->fetch(PDO::FETCH_BOTH)) {
-			return $this->_image($data);
+			return $this->_item($data);
 		}
 		return false;
 	}
 
-	public function getImageBySlug($slug) {
+	public function getItemBySlug($slug) {
 		$id = base_convert($slug, 16, 10);
-		return $this->getImageById($id);
+		return $this->getItemById($id);
 	}
 
-	public function getImageSlugById($id) {
+	public function getItemSlugById($id) {
 		return base_convert($id, 10, 16);
 	}
 
 	/**
-	 * choppe une image au pif dans la base
+	 * choppe un truc au pif dans la base
 	 * @param  array  $options
 	 *         			"select" : champs a selectionner, tout par défaut ("*")
-	 *         			"except" : tableau d'ids à ne pas intégrer dans la recherche d'image
-	 *         			"exceptSources" : tableau de [type, source] à ne pas intégrer dans la recherce d'image
+	 *         			"except" : tableau d'ids à ne pas intégrer dans la recherche
+	 *         			"exceptSources" : tableau de [type, source] à ne pas intégrer dans la recherce
 	 *         			"weighted": est-ce qu'on prend en compte le poids des sources ? oui par défaut
-	 * @return array      image
+	 * @return array      truc (image, ou citation genre vdm)
 	 */
-	public function getRandomImage($options = array()) {
+	public function getRandomItem($options = array()) {
 		$options = $options + array('select' => "*", 'except' => array(), 'exceptSources' => array(), 'weighted' => true);
-		$query = 'SELECT '.$options['select'].' from jedeprime_imgs WHERE 1=1';
+		$query = 'SELECT '.$options['select'].' from jedeprime_items WHERE 1=1';
 		if (!empty($options['except']))
 			$query .= " AND id NOT IN (".implode(', ', array_filter($options['except'])).")";
 		if ($options['weighted']) {
@@ -114,32 +115,32 @@ class ImageDatabase {
 		$query .= " ORDER BY RAND() LIMIT 0,1";
 		$data = $this->db->query($query);
 		if ($data) {
-			$image = $data->fetch(PDO::FETCH_BOTH);
-			if ($image)
-				return $this->_image($image);
-			else { //aucune image trouvée
-				if (!empty($filter)) { //on tente d'en trouver une avec un filtre sur type/source en moins
+			$item = $data->fetch(PDO::FETCH_BOTH);
+			if ($item)
+				return $this->_item($item);
+			else { //aucun truc trouvé
+				if (!empty($filter)) { //on tente d'en trouver un avec un filtre sur type/source en moins
 					$options['exceptSources'][] = $filter;
-					$image = $this->getRandomImage($options);
+					$item = $this->getRandomItem($options);
 				}
-				if ($image)
-					return $image;
+				if ($item)
+					return $item;
 				else //si même avec un filtre en moins ça passe pas, on prend un truc totalement au pif
-					return $this->getRandomImage();
+					return $this->getRandomItem();
 			}
 		}
 		return false;
 	}
 
-	public function getRandomImageId($not = array()) {
-		$img = $this->getRandomImage(array('select' => 'id', 'except' => $not));
+	public function getRandomItemId($not = array()) {
+		$img = $this->getRandomItem(array('select' => 'id', 'except' => $not));
 		if ($img) return $img['id'];
 		return false;
 	}
 
-	public function getRandomImageSlug($not = array()) {
-		$id = $this->getRandomImageId($not);
-		if ($id) return $this->getImageSlugById($id);
+	public function getRandomItemSlug($not = array()) {
+		$id = $this->getRandomItemId($not);
+		if ($id) return $this->getItemSlugById($id);
 		return false;
 	}
 
@@ -171,12 +172,12 @@ class ImageDatabase {
 	}
 
 	/**
-	 * liste des images
-	 * @return array toutes les urls des images de la base classées par id
+	 * liste des trucs en base
+	 * @return array toutes les urls des objets de la base classées par id
 	 */
-	protected function _getImageIds() {
+	protected function _getItemIds() {
 		$ids = array();
-		$data = $this->db->query('SELECT id, src from jedeprime_imgs order by id');
+		$data = $this->db->query('SELECT id, src from jedeprime_items order by id');
 		if ($data) {
 			while ($row = $data->fetch(PDO::FETCH_OBJ)) {
 				$ids[$row->id]= $row->src;
@@ -185,8 +186,9 @@ class ImageDatabase {
 		return $ids;
 	}
 
-	protected function _image($img) {
-		return $img + array('slug' => $this->getImageSlugById($img['id']));
+	protected function _item($img) {
+		if (empty($img['url'])) $img['url'] = $img['src'];
+		return $img + array('slug' => $this->getItemSlugById($img['id']));
 	}
 
 	/**
@@ -226,6 +228,19 @@ class ImageDatabase {
 	}
 
 	/**
+	 * transforme un objet xml représentant une vdm sur le rss vdm en un tableau avec des attributs communs à tout objet
+	 * @param  SimpleXMLElement $xml objet xml représentant la vdm
+	 * @return array tableau représentant la vdm ayant une 'src', un 'title', et le 'xml'
+	 */
+	protected function _vdmText($xml) {
+		return array(
+			"src" => (string) $xml->id,
+			"title" => (string) $xml->content,
+			"xml" => $xml->asXML()
+		);
+	}
+
+	/**
 	 * peut-on lancer une maj de la BDD ?
 	 * @return boolean oui ou non, dah
 	 */
@@ -253,20 +268,20 @@ class ImageDatabase {
 	}
 
 	/**
-	 * insert des images en base de données
+	 * insert des objets en base de données
 	 *
-	 * les images déjà présentes en base ne sont pas mises à jour
+	 * les objets déjà présents en base ne sont pas mis à jour
 	 * 	
-	 * @param  array $imgs tableau d'images (une image = tableau de 'src', 'url', 'title', 'xml')
-	 * @return int nombre d'images insérées
+	 * @param  array $imgs tableau d'objets (un objet = tableau de 'src', 'url', 'title', 'xml')
+	 * @return int nombre d'objets insérées
 	 */
-	protected function _insertImages($imgs) {
-		if (empty($this->ids)) $this->ids = $this->_getImageIds();
-		$query = "INSERT INTO jedeprime_imgs(src, url, title, type, source) VALUES ";
+	protected function _insertItems($items) {
+		if (empty($this->ids)) $this->ids = $this->_getItemIds();
+		$query = "INSERT INTO jedeprime_items(src, url, title, type, source) VALUES ";
 		$queryValues = array();
-		foreach ($imgs as $img) {
-			if (!empty($img['src']) && !in_array($img['src'], $this->ids))
-				$queryValues[]= '("'.addslashes($img['src']).'", "'.addslashes($img['url']).'", "'.addslashes($img['title']).'", "'.addslashes($img['type']).'", "'.addslashes($img['source']).'")';
+		foreach ($items as $item) {
+			if (!empty($item['src']) && !in_array($item['src'], $this->ids))
+				$queryValues[]= '("'.addslashes($item['src']).'", "'.addslashes($item['url']).'", "'.addslashes($item['title']).'", "'.addslashes($item['type']).'", "'.addslashes($item['source']).'")';
 		}
 		if (empty($queryValues))
 			return false;
@@ -302,7 +317,7 @@ class ImageDatabase {
 				}
 			}
 		}
-		return $this->_insertImages($imgs);
+		return $this->_insertItems($imgs);
 	}
 
 	/**
@@ -320,7 +335,7 @@ class ImageDatabase {
 				}
 			}
 		}
-		return $this->_insertImages($imgs);
+		return $this->_insertItems($imgs);
 	}
 
 	/**
@@ -338,6 +353,21 @@ class ImageDatabase {
 				}
 			}
 		}
-		return $this->_insertImages($imgs);
+		return $this->_insertItems($imgs);
+	}
+
+	/**
+	 * insert en base les dernières VDM http://viedemerde.fr
+	 * @return int nombre de vdm insérées
+	 */
+	public function _insertVDM($source, $type) {
+		$vdms = array();
+		$xml = @simplexml_load_file($source);
+		if ($xml) {
+			foreach ($xml->entry as $item) {
+				$vdms[]= $this->_vdmText($item) + array('type' => $type, 'source' => $source);
+			}
+		}
+		return $this->_insertItems($vdms);
 	}
 }
