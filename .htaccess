@@ -1,4 +1,5 @@
-SetEnv PHP_VER 5_3 # mutu OVH
+# mutu OVH
+SetEnv PHP_VER 5_3
 
 <IfModule mod_rewrite.c>
 	RewriteEngine On
