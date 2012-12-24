@@ -11,12 +11,6 @@
 	require 'vendor/autoload.php';
 	require 'lib/ImageDatabase.php';
 
-	session_cache_limiter(false);
-	session_start();
-	
-	if (empty($_SESSION['seen_img_ids']))
-		$_SESSION['seen_img_ids'] = array();
-
 	$db = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME."", DB_USER, DB_PASSWORD, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
 	$imageDB = new ImageDatabase($db, SOURCES_FILE, intval(!PROD));
 	$app = new \Slim\Slim(array(
@@ -32,16 +26,27 @@
 	});
 
 	$app->get('/', function() use ($app, $imageDB) {
-		$_SESSION['img'] = null;
 		$nextImgSlug = $imageDB->getRandomImageSlug();
 		$app->render('home.php', array('simpleText' => true, 'nextImgSlug' => $nextImgSlug));
 	})->name('home');
 
 	$app->get('/jarretededeprimer/:slug', function($slug) use ($app, $imageDB) {
-		$img = $_SESSION['img'] = $imageDB->getImageBySlug($slug);
-		if (!in_array($img['id'], $_SESSION['seen_img_ids']))
-			$_SESSION['seen_img_ids'][]= $img['id'];
-		$nextImgSlug = $imageDB->getRandomImageSlug($_SESSION['seen_img_ids']);
+		//on vérifie le cookie contenant les ids d'images déjà vues (c'est un tableau d'ids)
+		$seenImgsCookie = $app->getCookie('seen_img_ids');
+		if ($seenImgsCookie) {
+			$seenImgIds = array_filter(explode(';', htmlspecialchars($seenImgsCookie)));
+			$idsOk = true;
+			foreach ($seenImgIds as $id) { if (!is_numeric($id)) { $idsOk = false; break; } }
+		}
+		if (empty($seenImgIds) || empty($idsOk)) $seenImgIds = array();
+
+		$img = $imageDB->getImageBySlug($slug);
+		if (!in_array($img['id'], $seenImgIds))
+			$seenImgIds[]= $img['id'];
+		$nextImgSlug = $imageDB->getRandomImageSlug($seenImgIds);
+		
+		$app->setCookie('seen_img_ids', implode(';', $seenImgIds), time()+60*60*24*3);
+
 		$app->render('home.php', array('img' => $img, 'nextImgSlug' => $nextImgSlug));
 	})->name('jarretededeprimer');
 
@@ -55,10 +60,7 @@
 	})->name('cayestjedeprimeplus');
 
 	$app->get('/cayestjedeprimeplus/', function() use ($app, $imageDB) {
-		$data = array('share' => true);
-		if (!empty($_SESSION['img']))
-			$app->redirect('/cayestjedeprimeplus/'.$imageDB->getImageSlugById($_SESSION['img']['id']));
-		$app->render('home.php', $data);
+		$app->render('home.php', array('share' => true));
 	})->name('cayestjedeprimeplus-empty');
 	
 	$app->get('/updateImages', function() use($imageDB) {
