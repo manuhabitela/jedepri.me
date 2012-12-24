@@ -118,7 +118,7 @@ a:active {
 	position: relative;
 	width: auto;
 	max-width: 500px;
-	margin: 20px auto;
+	margin: 0 auto 20px;
 }
 
 .img {
@@ -132,7 +132,7 @@ a:active {
 }
 
 .img-caption {
-	margin-bottom: 0;
+	margin: 0;
 	color: #222;
 	font-size: 1.1em;
 }
@@ -150,7 +150,6 @@ a.reader-choice {
 	padding: 0.1em 0.2em;
 	white-space: nowrap;
 }
-
 
 a.sad {
 	color: #aaa;
@@ -312,6 +311,11 @@ a.happy:hover, a.happy:focus {
 		hyphens: auto;
 		font-size: 1em;
 		width: 90%;
+	}
+
+	.share-link {
+		padding: 6px 14px;
+		margin: 5px;
 	}
 
 	.no-mobile {
