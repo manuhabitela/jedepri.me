@@ -106,10 +106,10 @@ class JedeprimeItemDatabase {
 	public function getRandomItem($options = array()) {
 		$options = $options + array('select' => "*", 'except' => array(), 'exceptSources' => array(), 'weighted' => true);
 		$query = 'SELECT '.$options['select'].' from jedeprime_items WHERE 1=1';
-		if (!empty($options['except']))
+		if (!empty($options['except'])) {
 			$query .= " AND id NOT IN (".implode(', ', array_filter($options['except'])).")";
-		if ($options['weighted']) {
-			$filter = $this->_getNotSoRandomSource($options['exceptSources']);
+		}
+		if ($options['weighted'] && $filter = $this->_getNotSoRandomSource($options['exceptSources'])) {
 			$query .= " AND type = \"".addslashes($filter['type'])."\" AND source = \"".addslashes($filter['source'])."\"";
 		}
 		$query .= " ORDER BY RAND() LIMIT 0,1";
@@ -121,12 +121,9 @@ class JedeprimeItemDatabase {
 			else { //aucun truc trouvé
 				if (!empty($filter)) { //on tente d'en trouver un avec un filtre sur type/source en moins
 					$options['exceptSources'][] = $filter;
-					$item = $this->getRandomItem($options);
+					return $this->getRandomItem($options);
 				}
-				if ($item)
-					return $item;
-				else //si même avec un filtre en moins ça passe pas, on prend un truc totalement au pif
-					return $this->getRandomItem();
+				return $this->getRandomItem();
 			}
 		}
 		return false;
