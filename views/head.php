@@ -11,7 +11,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 		<!-- dev : /css/style.css -->
-		<?php $css = PROD ? '/css/style.min.css?v=967456120' : '/css/style.css?v='.time() ?>
+		<?php $css = PROD ? '/css/style.min.css?v=9674561201' : '/css/style.css?v='.time() ?>
 		<link rel="stylesheet" href="<?php echo $css ?>">
 
 		<?php $canonical = HOST.(!empty($img) ? $app->urlFor('jarretededeprimer', array('slug' => $img['slug'])) : '') ?>
