@@ -60,16 +60,11 @@ img {
 }
 
 /*  jedeprime */
-html {
-	/*height: 100%;*/
-}
-
 body {
 	font-family: Georgia, serif;
 	text-align: center;
 	margin: 0 auto;
 	width: auto;
-	/*min-height: 100%;*/
 	background: #f1f1f1 none repeat top left;
 	text-rendering: optimizeLegibility;
 	position: relative;
@@ -87,11 +82,6 @@ a {
 
 a:active {
 	top: 1px;
-}
-
-.note { 
-	font-style: italic;
-	font-size: small;
 }
 
 .loading {
@@ -114,43 +104,32 @@ a:active {
 	padding: 20px 0 0 0;
 }
 
-#img {
+#item {
 	position: relative;
 	width: auto;
 	max-width: 500px;
 	margin: 0 auto 20px;
 }
 
-.img {
+.item-img {
 	box-shadow: 0 2px 20px -2px #777;
 	border: 1px solid #808080;
 	margin: 10px 0;
 }
 
-.img-caption, .img-source a {
+.item-title, .item-source a {
 	font-style: italic;
 }
 
-.img-caption {
+.item-title {
 	margin: 0;
 	color: #222;
 	font-size: 1.1em;
 }
 
-.img-source a {
+.item-source a {
 	color: #888;
 	font-size: .8em;
-}
-
-.vdm .img-caption {
-	padding: 8px;
-	background-color: #fff;
-	border-radius: 4px;
-	box-shadow: 0 1px 1px #dedede;
-	font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, sans-serif;
-	font-size: 13px;
-	font-style: normal;
-	line-height: 1.5em;
 }
 
 a.reader-choice {
@@ -258,6 +237,18 @@ a.happy:hover, a.happy:focus {
 	color: #bbb;
 }
 
+/* styles propres à certaines sources */
+.item-source-vdm .item-text {
+	padding: 8px;
+	background-color: #fff;
+	border-radius: 4px;
+	box-shadow: 0 1px 1px #dedede;
+	font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, sans-serif;
+	font-size: 13px;
+	font-style: normal;
+	line-height: 1.5em;
+}
+
 @media (min-width: 641px) {
 	body {
 		background-image: url(../img/bgnoise.png);
@@ -265,14 +256,18 @@ a.happy:hover, a.happy:focus {
 }
 
 @media (max-width: 640px) {
-	body, #img, #img .img, .share-text {
+	body, #item, #item .item-img, .share-text {
 		width: auto;
 		max-width: 100%;
 		margin: 0;
 		padding: 0;
 	}
 
-	#img .img {
+	#content {
+		padding: 5px 0 0 0;
+	}
+
+	#item .item-img {
 		margin: 10px 0;
 	}
 

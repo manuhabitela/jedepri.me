@@ -1,26 +1,26 @@
 {
 	"tumblr-photo": {
-		"http://bonjourhamster.fr": 20,
-		"http://dailybunny.tumblr.com": 20,
-		"http://bonjourlesgeeks.com": 30,
-		"http://bonjourhumour.tumblr.com": 30,
-		"http://viktoria-f.tumblr.com": 40,
-		"http://sexiestfoods.tumblr.com": 40,
-		"http://veganfoody.tumblr.com": 20,
-		"http://jedeprime.tumblr.com": 60
+		"http://bonjourhamster.fr":        [20],
+		"http://dailybunny.tumblr.com":    [20],
+		"http://bonjourlesgeeks.com":      [30],
+		"http://bonjourhumour.tumblr.com": [30],
+		"http://viktoria-f.tumblr.com":    [40],
+		"http://sexiestfoods.tumblr.com":  [40],
+		"http://veganfoody.tumblr.com":    [20],
+		"http://jedeprime.tumblr.com":     [60]
 	},
 	"tumblr-regular": {
-		"http://quandmonchat.tumblr.com": 60
+		"http://quandmonchat.tumblr.com": [60, true]
 	},
 	"subreddit": {
-		"funny": 70,
-		"gif": 100,
-		"aww": 70
+		"funny": [70, true],
+		"gif":   [100, true],
+		"aww":   [70, true]
 	},
 	"imgur-search": {
-		"hug": 50
+		"hug": [50, true]
 	},
 	"vdm": {
-		"http://feeds.uri.lv/viedemerde": 20
+		"http://feeds.uri.lv/viedemerde": [20]
 	}
 }

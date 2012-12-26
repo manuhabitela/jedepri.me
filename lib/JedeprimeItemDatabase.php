@@ -47,11 +47,14 @@ class JedeprimeItemDatabase {
 		'vdm' => '_insertVDM'
 	);
 
+	protected $table;
+
 	function __construct($pdo, $sourceFile, $debug = 0) {
 		$this->db = $pdo;
 		$this->sources = json_decode(file_get_contents($sourceFile), true);
 		libxml_use_internal_errors(true);
 		$this->debug = $debug;
+		$this->table = $debug ? 'jedeprime_items_dev' : 'jedeprime_items';
 	}
 
 	/**
@@ -61,12 +64,14 @@ class JedeprimeItemDatabase {
 	public function fillDB($givenType = null) {
 		$methods = self::$sourceTypeMethods;
 		if ($this->_isUpdateOk() || $this->debug == 1) {
-			$this->ids = $this->_getItemIds();
+			$this->ids = $this->getItemIds();
 			foreach ($this->sources as $type => $sources) {
 				if ($givenType == null || $type == $givenType) {
-					foreach ($sources as $source => $weight) {
+					foreach ($sources as $source => $sourceInfo) {
+						$sourceOpts = array('type' => $type);
+						$sourceOpts['title'] = empty($sourceInfo[1]) ? false : $sourceInfo[1];
 						if (method_exists($this, $methods[$type]))
-							$this->{$methods[$type]}($source, $type);
+							$this->{$methods[$type]}($source, $sourceOpts);
 					}
 				}
 			}
@@ -76,8 +81,23 @@ class JedeprimeItemDatabase {
 		}
 	}
 
+	/**
+	 * liste des trucs en base
+	 * @return array tous les hash des objets de la base classés par id
+	 */
+	public function getItemIds() {
+		$ids = array();
+		$data = $this->db->query('SELECT id, hash from '.$this->table.' order by id');
+		if ($data) {
+			while ($row = $data->fetch(PDO::FETCH_OBJ)) {
+				$ids[$row->id]= $row->hash;
+			}
+		}
+		return $ids;
+	}
+
 	public function getItemById($id) {
-		$query = 'SELECT * from jedeprime_items WHERE id = '.$id;
+		$query = 'SELECT * from '.$this->table.' WHERE id = '.$id;
 		$data = $this->db->query($query);
 		if ($data && $data = $data->fetch(PDO::FETCH_BOTH)) {
 			return $this->_item($data);
@@ -105,12 +125,12 @@ class JedeprimeItemDatabase {
 	 */
 	public function getRandomItem($options = array()) {
 		$options = $options + array('select' => "*", 'except' => array(), 'exceptSources' => array(), 'weighted' => true);
-		$query = 'SELECT '.$options['select'].' from jedeprime_items WHERE 1=1';
+		$query = 'SELECT '.$options['select'].' from '.$this->table.' WHERE 1=1';
 		if (!empty($options['except'])) {
 			$query .= " AND id NOT IN (".implode(', ', array_filter($options['except'])).")";
 		}
 		if ($options['weighted'] && $filter = $this->_getNotSoRandomSource($options['exceptSources'])) {
-			$query .= " AND type = \"".addslashes($filter['type'])."\" AND source = \"".addslashes($filter['source'])."\"";
+			$query .= " AND `source-type` = \"".addslashes($filter['type'])."\" AND source = \"".addslashes($filter['source'])."\"";
 		}
 		$query .= " ORDER BY RAND() LIMIT 0,1";
 		$data = $this->db->query($query);
@@ -130,8 +150,8 @@ class JedeprimeItemDatabase {
 	}
 
 	public function getRandomItemId($not = array()) {
-		$img = $this->getRandomItem(array('select' => 'id', 'except' => $not));
-		if ($img) return $img['id'];
+		$item = $this->getRandomItem(array('select' => 'id', 'except' => $not));
+		if ($item) return $item['id'];
 		return false;
 	}
 
@@ -152,7 +172,8 @@ class JedeprimeItemDatabase {
 		$totalWeight = 0;
 		$weightRanges = array();
 		foreach ($this->sources as $type => $sources) {
-			foreach ($sources as $source => $weight) {
+			foreach ($sources as $source => $sourceInfo) {
+				$weight = $sourceInfo[0];
 				//on ne prend pas en compte cette source si elle est dans le tableau $not
 				if (!empty($not) && in_array( array('type' => $type, 'source' => $source), $not ))
 					continue;
@@ -169,23 +190,25 @@ class JedeprimeItemDatabase {
 	}
 
 	/**
-	 * liste des trucs en base
-	 * @return array toutes les urls des objets de la base classées par id
+	 * tableau représentant un objet de la base
+	 * champs: id, slug, title, content, content-type, source, source-type, external-url, hash, created
+	 * @param  array $item tableau non complet décrivant l'objet
+	 * @return array       tableau complet décrivant l'objet
 	 */
-	protected function _getItemIds() {
-		$ids = array();
-		$data = $this->db->query('SELECT id, src from jedeprime_items order by id');
-		if ($data) {
-			while ($row = $data->fetch(PDO::FETCH_OBJ)) {
-				$ids[$row->id]= $row->src;
-			}
-		}
-		return $ids;
-	}
-
-	protected function _item($img) {
-		if (empty($img['url'])) $img['url'] = $img['src'];
-		return $img + array('slug' => $this->getItemSlugById($img['id']));
+	protected function _item($item, $options = array()) {
+		$item = $item + array(
+			'content' => '',
+			'content-type' => '',
+			'title' => '',
+			'url' => '',
+			'source-type' => !empty($options['type']) ? $options['type'] : ''
+		);
+		$item['hash'] = md5($item['url'].$item['content']);
+		if (!empty($item['id']))
+			$item['slug'] = $this->getItemSlugById($item['id']);
+		if (isset($options['title']) && empty($options['title']))
+			$item['title'] = '';
+		return $item;
 	}
 
 	/**
@@ -193,21 +216,21 @@ class JedeprimeItemDatabase {
 	 * @param  SimpleXMLElement $xml objet xml représentant l'image 
 	 * @return array tableau représentant l'image ayant une 'src', une 'url', un 'title', et le 'xml'
 	 */
-	protected function _tumblrImage($xml) {
+	protected function _tumblrImage($xml, $options) {
 		$image = array(
 			"url" => (string) $xml['url'],
-			"xml" => $xml->asXML()
+			'content-type' => 'img-url'
 		);
 		if ($xml['type'] == 'photo') {
-			$image['src'] = (string) $xml->{'photo-url'}[1];
+			$image['content'] = (string) $xml->{'photo-url'}[1];
 			$image['title'] = strip_tags((string) $xml->{'photo-caption'});
 		}
 		if ($xml['type'] == 'regular') {
 			preg_match('/<p><img.+src="(.+)"\/><\/p>/s', html_entity_decode($xml->{'regular-body'}), $src); // A LA CRADE OUAIS
-			$image['src'] = $src[1];
+			$image['content'] = $src[1];
 			$image['title'] = (string) $xml->{'regular-title'};
 		}
-		return !empty($image['src']) ? $image : false;
+		return !empty($image['content']) ? $this->_item($image, $options) : false;
 	}
 
 	/**
@@ -215,13 +238,13 @@ class JedeprimeItemDatabase {
 	 * @param  SimpleXMLElement $xml objet xml représentant l'image 
 	 * @return array tableau représentant l'image ayant une 'src', une 'url', un 'title', et le 'xml'
 	 */
-	protected function _imgurImage($xml) {
-		return array(
-			"src" => (string) 'http://i.imgur.com/'.$xml->hash.$xml->ext,
+	protected function _imgurImage($xml, $options) {
+		return $this->_item(array(
+			"content" => (string) 'http://i.imgur.com/'.$xml->hash.$xml->ext,
+			"content-type" => 'img-url',
 			"url" => (string) 'http://imgur.com/'.$xml->hash,
-			"title" => (string) $xml->title,
-			"xml" => $xml->asXML()
-		);
+			"title" => (string) $xml->title
+		), $options);
 	}
 
 	/**
@@ -229,12 +252,12 @@ class JedeprimeItemDatabase {
 	 * @param  SimpleXMLElement $xml objet xml représentant la vdm
 	 * @return array tableau représentant la vdm ayant une 'src', un 'title', et le 'xml'
 	 */
-	protected function _vdmText($xml) {
-		return array(
-			"src" => (string) $xml->id,
-			"title" => (string) $xml->content,
-			"xml" => $xml->asXML()
-		);
+	protected function _vdmText($xml, $options) {
+		return $this->_item(array(
+			"url" => (string) $xml->id,
+			"content" => (string) $xml->content,
+			"content-type" => "text"
+		), $options);
 	}
 
 	/**
@@ -269,20 +292,20 @@ class JedeprimeItemDatabase {
 	 *
 	 * les objets déjà présents en base ne sont pas mis à jour
 	 * 	
-	 * @param  array $imgs tableau d'objets (un objet = tableau de 'src', 'url', 'title', 'xml')
+	 * @param  array $items tableau d'objets
 	 * @return int nombre d'objets insérées
 	 */
 	protected function _insertItems($items) {
-		if (empty($this->ids)) $this->ids = $this->_getItemIds();
-		$query = "INSERT INTO jedeprime_items(src, url, title, type, source) VALUES ";
+		if (empty($this->ids)) $this->ids = $this->getItemIds();
+		$query = 'INSERT INTO '.$this->table.'(hash, content, `content-type`, `external-url`, title, `source-type`, source) VALUES ';
 		$queryValues = array();
 		foreach ($items as $item) {
-			if (!empty($item['src']) && !in_array($item['src'], $this->ids))
-				$queryValues[]= '("'.addslashes($item['src']).'", "'.addslashes($item['url']).'", "'.addslashes($item['title']).'", "'.addslashes($item['type']).'", "'.addslashes($item['source']).'")';
+			if (!empty($item['hash']) && !in_array($item['hash'], $this->ids))
+				$queryValues[]= '("'.$item['hash'].'", "'.addslashes($item['content']).'", "'.$item['content-type'].'", "'.addslashes($item['url']).'", "'.addslashes($item['title']).'", "'.addslashes($item['source-type']).'", "'.addslashes($item['source']).'")';
 		}
 		if (empty($queryValues))
 			return false;
-		$query = $query.implode(', ', $queryValues)." ON DUPLICATE KEY UPDATE src=src;";
+		$query = $query.implode(', ', $queryValues)." ON DUPLICATE KEY UPDATE hash=hash;";
 		return $this->db->exec($query);
 	}
 
@@ -291,8 +314,8 @@ class JedeprimeItemDatabase {
 	 * @param  string $tumblr url du tumblr dont on veut choper les images
 	 * @return int nombre d'images insérées
 	 */
-	protected function _insertTumblr($tumblr, $type) {
-		$tumblrType = substr(strstr($type, '-'), 1);
+	protected function _insertTumblr($tumblr, $options) {
+		$tumblrType = substr(strstr($options['type'], '-'), 1);
 		$max = 300;
 		$num = 50;
 		//avec les tumblr on passe par yql, ça semble mieux passer qu'en direct, bizarrement...
@@ -308,9 +331,9 @@ class JedeprimeItemDatabase {
 			$xml = @simplexml_load_file("http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20xml%20where%20url%3D'".urlencode($tumblr.'/api/read?start='.($i*$num).'&num='.$num.'&type='.$tumblrType)."'");
 			if (!empty($xml->results->tumblr->posts)) {
 				foreach ($xml->results->tumblr->posts->children() as $item) {
-					$img = $this->_tumblrImage($item);
+					$img = $this->_tumblrImage($item, $options);
 					if ($img)
-						$imgs[] = $img + array('type' => $type, 'source' => $tumblr);
+						$imgs[] = $img + array('source' => $tumblr);
 				}
 			}
 		}
@@ -322,13 +345,13 @@ class JedeprimeItemDatabase {
 	 * @param  string $subreddit nom du subreddit dont on veut choper les images
 	 * @return int nombre d'images insérées
 	 */
-	protected function _insertSubreddit($subreddit, $type) {
+	protected function _insertSubreddit($subreddit, $options) {
 		$imgs = array();
 		for ($i=0; $i < 10; $i++) {
 			$xml = @simplexml_load_file('http://imgur.com/r/'.$subreddit.'/top/page/'.$i.'.xml');
 			if ($xml) {
 				foreach ($xml->item as $item) {
-					$imgs[]= $this->_imgurImage($item) + array('type' => $type, 'source' => $subreddit);
+					$imgs[]= $this->_imgurImage($item, $options) + array('source' => $subreddit);
 				}
 			}
 		}
@@ -340,13 +363,13 @@ class JedeprimeItemDatabase {
 	 * @param  string $keyword mot(s) clé de la recherche qu'on fait sur imgur
 	 * @return int nombre d'images insérées
 	 */
-	protected function _insertImgurFilteredGallery($keyword, $type) {
+	protected function _insertImgurFilteredGallery($keyword, $options) {
 		$imgs = array();
 		for ($i=0; $i < 3; $i++) {
 			$xml = @simplexml_load_file('http://imgur.com/gallery/page/'.$i.'.xml?q='.str_replace(' ', '+', $keyword));
 			if ($xml) {
 				foreach ($xml->item as $item) {
-					$imgs[]= $this->_imgurImage($item) + array('type' => $type, 'source' => $keyword);
+					$imgs[]= $this->_imgurImage($item, $options) + array('source' => $keyword);
 				}
 			}
 		}
@@ -357,14 +380,21 @@ class JedeprimeItemDatabase {
 	 * insert en base les dernières VDM http://viedemerde.fr
 	 * @return int nombre de vdm insérées
 	 */
-	public function _insertVDM($source, $type) {
+	protected function _insertVDM($source, $options) {
 		$vdms = array();
 		$xml = @simplexml_load_file($source);
 		if ($xml) {
 			foreach ($xml->entry as $item) {
-				$vdms[]= $this->_vdmText($item) + array('type' => $type, 'source' => $source);
+				$vdms[]= $this->_vdmText($item, $options) + array('source' => $source);
 			}
 		}
 		return $this->_insertItems($vdms);
+	}
+
+	protected function _updateAllHashes() {
+		$q = $this->db->query('select * from '.$this->table);
+		while ($row = $q->fetch(PDO::FETCH_BOTH)) {
+			$this->db->exec('UPDATE '.$this->table.' SET hash = "'.md5($row['external-url'].$row['content']).'" where id='.$row['id']);
+		}
 	}
 }

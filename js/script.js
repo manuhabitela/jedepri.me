@@ -34,6 +34,9 @@
 		}
 		el.className = el.className.replace(new RegExp('(^|\\s)' + className + '(?:\\s|$)'), '$1');
 	};
+	var preventDefault = function(event) {
+		if (event.preventDefault) event.preventDefault(); else event.returnValue = false;
+	};
 	var addEvent = (function () {
 		var filter = function(el, type, fn) {
 			for ( var i = 0, len = el.length; i < len; i++ ) {
@@ -61,51 +64,51 @@
 	this.request=this.getRequest();if(this.request){var req=this.request;req.onreadystatechange=this.bindFunction(this.stateChange,this);if(this.postBody!==""){req.open("POST",url,true);req.setRequestHeader("X-Requested-With","XMLHttpRequest");req.setRequestHeader("Content-type","application/x-www-form-urlencoded");req.setRequestHeader("Connection","close")}else req.open("GET",url,true);req.send(this.postBody)}};
 	var H = window.history && typeof history.pushState !== 'undefined';
 
-	var currentImgSrc = $('#img .img') !== null ? $('#img .img').src : '',
-		nextImgSrc = '',
+	var currentHash = $('#item').getAttribute('data-hash') !== null ? $('#item').getAttribute('data-hash') : '',
+		nextHash = '',
 		nextContent = '',
 		dummy = document.createElement('div'),
-		preloadImg = function() {
+		preloadItem = function() {
 			microAjax($('a.reader-choice.sad').href + "?isajax=1", function(res) {
 				if (res.status == 200) {
 					nextContent = dummy.innerHTML = res.responseText;
-					nextImgSrc = $('#img .img', dummy) !== null ? $('#img .img', dummy).src : '';
+					nextHash = $('#item[data-hash]', dummy) !== null ? $('#item[data-hash]', dummy).getAttribute('data-hash') : '';
 				}
 			});
 		},
-		updateImgView = function(event, url) {
-			var imgContainer = $('#img');
-			currentImgSrc = $('.img', imgContainer) !== null ? $('.img', imgContainer).src : '';
+		updateItemView = function(event, url) {
+			var itemContainer = $('#item');
+			currentHash = itemContainer.getAttribute('data-hash') !== null ? itemContainer.getAttribute('data-hash') : '';
 
-			removeClass($('.choices'), 'hidden');
-			addClass($('.share'), 'hidden');
-			imgContainer.innerHTML = '';
-			addClass(imgContainer, 'loading');
+			itemContainer.innerHTML = '';
+			addClass(itemContainer, 'loading');
 
-			if (nextImgSrc !== '' && nextImgSrc !== currentImgSrc) {
-				removeClass(imgContainer, 'loading');
+			if (nextHash !== '' && nextHash !== currentHash) {
+				removeClass(itemContainer, 'loading');
 				$('#content').innerHTML = nextContent;
-				_gaq.push(['_trackEvent', 'choix', 'triste', $('#img .img').src]);
-				preloadImg();
+				_gaq.push(['_trackEvent', 'choix', 'triste', $('#item .for-analytics').innerHTML]);
+				preloadItem();
 			} else {
 				microAjax(url + "?isajax=1", function(res) {
-					removeClass(imgContainer, 'loading');
+					removeClass(itemContainer, 'loading');
 					if (res.status == 200) {
 						$('#content').innerHTML = res.responseText;
-						_gaq.push(['_trackEvent', 'choix', 'triste', $('#img .img').src]);
+						_gaq.push(['_trackEvent', 'choix', 'triste', $('#item .for-analytics').innerHTML]);
 					}
-					preloadImg();
+					preloadItem();
 				});
 			}
 			if (H) history.pushState({ content: $('#content').innerHTML, url: url }, document.title, url);
-
-			if (event.preventDefault) event.preventDefault(); else event.returnValue = false;
+			preventDefault(event);
 		},
-		showSharePage = function(event, url) {
-			addClass($('.choices'), 'hidden');
-			removeClass($('.share'), 'hidden');
-			if (event.preventDefault) event.preventDefault(); else event.returnValue = false;
-			if (H) history.pushState({ content: $('#content').innerHTML, url: url }, document.title, url);
+		ajaxifyLink = function(event, url) {
+			microAjax(url + "?isajax=1", function(res) {
+				if (res.status == 200) {
+					$("#content").innerHTML = res.responseText;
+					if (H) history.pushState({ content: $('#content').innerHTML, url: url }, document.title, url);
+				}
+			});
+			preventDefault(event);
 		},
 		/* code trop secret tu peux pas test */
 		wat = [38,38,40,40,37,39,37,39,66,65],
@@ -124,21 +127,21 @@
 			}
 		};
 
-	setTimeout(function() { preloadImg(); }, 100);
+	setTimeout(function() { preloadItem(); }, 100);
 	addEvent($('#content'), 'click', function(e) {
 		var target = e.target || e.srcElement;
 		if ( target && target.nodeName === 'A' && hasClass(target, 'reader-choice') && hasClass(target, 'sad') ) {
-			updateImgView(e, target.href);
+			updateItemView(e, target.href);
 		}
 
 		if ( target && target.nodeName === 'A' && hasClass(target, 'reader-choice') && hasClass(target, 'happy') ) {
 			_gaq.push(['_trackEvent', 'choix', 'content']);
-			showSharePage(e, target.href);
+			ajaxifyLink(e, target.href);
 		}
 
 		if ( target && target.nodeName === 'A' && hasClass(target, 'toggle-view') ) {
 			window.history.go(-1);
-			if (event.preventDefault) event.preventDefault(); else event.returnValue = false;
+			preventDefault(event);
 		}
 
 		if ( target && target.nodeName === 'A' && hasClass(target, 'share-link') && hasClass(target, 'twitter') ) {
