@@ -30,7 +30,7 @@
 
 <div class="choices">
 	<h1 class="title"><?php echo $rand[0]; ?></h1>
-	<a href="<?php echo !empty($nextItemSlug) ? $app->urlFor('jarretededeprimer', array('slug' => $nextItemSlug)) : $app->urlFor('jarretededeprimer-empty') ?>" class="reader-choice sad"><?php echo $rand[1]; ?></a>
-	<a href="<?php echo !empty($item) ? $app->urlFor('cayestjedeprimeplus', array('slug' => $item['slug'])) : $app->urlFor('cayestjedeprimeplus-empty') ?>" class="reader-choice happy"><?php echo $rand[2]; ?></a>
+	<a href="<?php echo !empty($nextItemSlug) ? $app->urlFor('question', array('slug' => $nextItemSlug)) : $app->urlFor('question-empty') ?>" class="reader-choice sad"><?php echo $rand[1]; ?></a>
+	<a href="<?php echo !empty($item) ? $app->urlFor('partage', array('slug' => $item['slug'])) : $app->urlFor('partage-empty') ?>" class="reader-choice happy"><?php echo $rand[2]; ?></a>
 </div>
 <?php if (!$app->request()->isAjax()) include('foot.php'); ?>

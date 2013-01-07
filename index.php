@@ -2,7 +2,7 @@
 	/**
 	 * ce code est amicalement sponsorisé par la méthode rache
 	 */
-	define('PROD', (!empty($_SERVER['SERVER_NAME']) && strpos($_SERVER['SERVER_NAME'], 'jedepri.me') !== false));
+	define('PROD', (!empty($_SERVER['SERVER_NAME']) && strpos($_SERVER['SERVER_NAME'], APP_SERVER) !== false));
 	if (PROD)
 		error_reporting(0);
 	
@@ -28,7 +28,7 @@
 
 	$app->get('/', function() use ($app, $db) {
 		$nextItemSlug = $db->getRandomItemSlug();
-		$app->render('jarretededeprimer.php', array('simpleText' => true, 'nextItemSlug' => $nextItemSlug));
+		$app->render('question.php', array('simpleText' => true, 'nextItemSlug' => $nextItemSlug));
 	})->name('home');
 
 	$app->get('/jarretededeprimer/:slug', function($slug) use ($app, $db) {
@@ -48,32 +48,32 @@
 		$app->setCookie('seen_item_ids', implode(';', $seenImgIds), time()+60*60*24*3);
 
 		$title = ($item['content-type'] == 'img-url' ? "Une image" : "Un truc").' qui fait arrêter de déprimer - Je déprime';
-		$app->render('jarretededeprimer.php', array(
+		$app->render('question.php', array(
 			'item' => $item, 
 			'nextItemSlug' => $nextItemSlug,
 			'twitterCard' => twitterCard($item),
 			'title' => $title
 		));
-	})->name('jarretededeprimer');
+	})->name('question');
 
 	$app->get('/jarretededeprimer/', function() use ($app, $db) {
 		$app->redirect('/jarretededeprimer/'.$db->getRandomItemSlug());
-	})->name('jarretededeprimer-empty');
+	})->name('question-empty');
 
 	$app->get('/cayestjedeprimeplus/:slug', function($slug) use ($app, $db) {
 		$title = "J'ai arrêté ma dépression grâce à ".($item['content-type'] == 'img-url' ? "cette image" : "ce truc").' ! - Je déprime';
-		$app->render('cayestjedeprimeplus.php', array(
+		$app->render('partage.php', array(
 			'item' => $db->getItemBySlug($slug),
 			'twitterCard' => twitterCard($item),
 			'title' => $title
 		));
-	})->name('cayestjedeprimeplus');
+	})->name('partage');
 
 	$app->get('/cayestjedeprimeplus/', function() use ($app, $db) {
-		$app->render('cayestjedeprimeplus.php', array(
+		$app->render('partage.php', array(
 			"title" => "J'ai arrêté ma depression sur jedepri.me ! - Je déprime"
 		));
-	})->name('cayestjedeprimeplus-empty');
+	})->name('partage-empty');
 	
 	$app->get('/updateImages', function() use($db) {
 		$db->fillDB();
