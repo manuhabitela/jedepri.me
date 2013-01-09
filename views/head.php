@@ -11,7 +11,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 		<!-- dev : /css/style.css -->
-		<?php $css = PROD ? '/css/style.min.css?v=95745612010' : '/css/style.css?v='.time() ?>
+		<?php $css = PROD ? '/css/style.min.css?v=957456120101' : '/css/style.css?v='.time() ?>
 		<link rel="stylesheet" href="<?php echo $css ?>">
 
 		<?php if (!empty($twitterCard)): ?>

@@ -95,6 +95,9 @@ a:active {
 	margin: 5px;
 	color: #555;
 	font-size: medium;
+	position: absolute;
+	top: 0;
+	left: 0;
 }
 
 .title {
