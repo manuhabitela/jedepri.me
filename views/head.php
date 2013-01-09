@@ -11,7 +11,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 		<!-- dev : /css/style.css -->
-		<?php $css = PROD ? '/css/style.min.css?v=9574561201' : '/css/style.css?v='.time() ?>
+		<?php $css = PROD ? '/css/style.min.css?v=95745612010' : '/css/style.css?v='.time() ?>
 		<link rel="stylesheet" href="<?php echo $css ?>">
 
 		<?php if (!empty($twitterCard)): ?>
@@ -25,5 +25,7 @@
 		<!--[if lte IE 7]>
 			<p class="obsolete-browser">Vous utilisez un navigateur <strong>obsolète</strong>. <a href="http://browsehappy.com/" target="_blank">Mettez-le à jour</a> pour naviguer sur Internet de façon <strong>sécurisée</strong> !</p>
 		<![endif]-->
+
+		<p class="switch-mode no-mobile">Pour simplement rigoler, va plutôt sur <a href="http://jairigo.lu">jairigo.lu</a>.</p>
 
 		<div id="content">
