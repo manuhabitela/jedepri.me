@@ -13,6 +13,10 @@ SetEnv PHP_VER 5_3
   RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\.php\ HTTP/
   RewriteRule ^index\.php$ http://jedepri.me/ [R=301,L]
 
+  #anciennes url jedepri.me
+  RewriteRule jarretededeprimer(.*) http://jedepri.me/toujours$1 [R=301,L]
+  RewriteRule cayestjedeprimeplus(.*) http://jedepri.me/plus$1 [R=301,L]
+
   #slim
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteRule ^ index.php [QSA,L]

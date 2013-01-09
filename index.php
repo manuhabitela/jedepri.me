@@ -31,7 +31,7 @@
 		$app->render('question.php', array('simpleText' => true, 'nextItemSlug' => $nextItemSlug));
 	})->name('home');
 
-	$app->get('/jarretededeprimer/:slug', function($slug) use ($app, $db) {
+	$app->get('/toujours/:slug', function($slug) use ($app, $db) {
 		//on vérifie le cookie contenant les ids d'images déjà vues (c'est un tableau d'ids)
 		$seenImgsCookie = $app->getCookie('seen_item_ids');
 		if ($seenImgsCookie) {
@@ -56,11 +56,11 @@
 		));
 	})->name('question');
 
-	$app->get('/jarretededeprimer/', function() use ($app, $db) {
-		$app->redirect('/jarretededeprimer/'.$db->getRandomItemSlug());
+	$app->get('/toujours/', function() use ($app, $db) {
+		$app->redirect('/toujours/'.$db->getRandomItemSlug());
 	})->name('question-empty');
 
-	$app->get('/cayestjedeprimeplus/:slug', function($slug) use ($app, $db) {
+	$app->get('/plus/:slug', function($slug) use ($app, $db) {
 		$title = "J'ai arrêté ma dépression grâce à ".($item['content-type'] == 'img-url' ? "cette image" : "ce truc").' ! - Je déprime';
 		$app->render('partage.php', array(
 			'item' => $db->getItemBySlug($slug),
@@ -69,7 +69,7 @@
 		));
 	})->name('partage');
 
-	$app->get('/cayestjedeprimeplus/', function() use ($app, $db) {
+	$app->get('/plus/', function() use ($app, $db) {
 		$app->render('partage.php', array(
 			"title" => "J'ai arrêté ma depression sur jedepri.me ! - Je déprime"
 		));
@@ -80,11 +80,11 @@
 	})->name('updateImages');
 
 	$app->get('/random', function() use ($app, $db) {
-		echo HOST.'/jarretededeprimer/'.$db->getRandomItemSlug();
+		echo HOST.'/toujours/'.$db->getRandomItemSlug();
 	});
 
 	$app->get('/:slug', function($slug) use($app) {
-		$app->redirect('/jarretededeprimer/'.$slug, 301);
+		$app->redirect('/toujours/'.$slug, 301);
 	});
 
 	$app->run();
