@@ -26,6 +26,6 @@
 			<p class="obsolete-browser">Vous utilisez un navigateur <strong>obsolète</strong>. <a href="http://browsehappy.com/" target="_blank">Mettez-le à jour</a> pour naviguer sur Internet de façon <strong>sécurisée</strong> !</p>
 		<![endif]-->
 
-		<p class="switch-mode no-mobile">Pour simplement rigoler, va plutôt sur <a href="http://jairigo.lu">jairigo.lu</a>.</p>
+		<p class="switch-mode no-mobile">Pour simplement rigoler, va sur <a href="http://jairigo.lu">jairigo.lu</a>.</p>
 
 		<div id="content">
