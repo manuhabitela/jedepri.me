@@ -33,7 +33,7 @@
 	 */
 	$app->get('/', function() use ($app, $db) {
 		$nextItemSlug = $db->getRandomItemSlug();
-		$app->render('question.php', array('simpleText' => true, 'nextItemSlug' => $nextItemSlug));
+		$app->render(APP_NAME . '/question.php', array('simpleText' => true, 'nextItemSlug' => $nextItemSlug));
 	})->name('home');
 
 	/**
@@ -59,7 +59,7 @@
 		$title = ($item['content-type'] == 'img-url' ? "Une image" : "Un truc") . (APP_NAME == "jedepri" ?
 			" qui fait arrêter de déprimer - Je déprime" :
 			" qui te fait rigolay - J'ai rigolu");
-		$app->render('question.php', array(
+		$app->render(APP_NAME . '/question.php', array(
 			'item' => $item,
 			'nextItemSlug' => $nextItemSlug,
 			'twitterCard' => twitterCard($item),
@@ -83,7 +83,7 @@
 		$title = APP_NAME == "jedepri" ?
 			"J'ai arrêté ma dépression grâce à ".($item['content-type'] == 'img-url' ? "cette image" : "ce truc").' ! - Je déprime' :
 			"J'ai rigolu trop méga fort en voyant ".($item['content-type'] == 'img-url' ? "cette image" : "ce truc").'.';
-		$app->render('partage.php', array(
+		$app->render(APP_NAME . '/partage.php', array(
 			'item' => $db->getItemBySlug($slug),
 			'twitterCard' => twitterCard($item),
 			'title' => $title
@@ -98,7 +98,7 @@
 		$title = APP_NAME == "jedepri" ?
 			"J'ai arrêté ma depression sur jedepri.me ! - Je déprime" :
 			"J'me suis roulé par terre et je le dis à toute la planète ! - J'ai rigolu'";
-		$app->render('partage.php', array(
+		$app->render(APP_NAME . '/partage.php', array(
 			"title" => $title
 		));
 	})->name('partage-empty');
