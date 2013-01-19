@@ -1,0 +1,1 @@
+<p class="switch-mode no-mobile">Pour arrêter de déprimer, va plutôt sur <a href="http://jedepri.me">jedepri.me</a>.</p>

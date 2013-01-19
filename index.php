@@ -2,11 +2,12 @@
 	/**
 	 * ce code est amicalement sponsorisé par la méthode rache
 	 */
+	require 'config/app.php';
+
 	define('PROD', (!empty($_SERVER['SERVER_NAME']) && strpos($_SERVER['SERVER_NAME'], APP_SERVER) !== false));
 	if (PROD)
 		error_reporting(0);
-	
-	require 'config/app.php';
+
 	require 'config/database.php';
 	require 'vendor/autoload.php';
 	require 'lib/JedeprimeItemDatabase.php';
@@ -26,12 +27,20 @@
 		));
 	});
 
+	/**
+	 * accueil
+	 * 
+	 */
 	$app->get('/', function() use ($app, $db) {
 		$nextItemSlug = $db->getRandomItemSlug();
 		$app->render('question.php', array('simpleText' => true, 'nextItemSlug' => $nextItemSlug));
 	})->name('home');
 
-	$app->get('/toujours/:slug', function($slug) use ($app, $db) {
+	/**
+	 * image
+	 * 
+	 */
+	$app->get('/' . APP_ROUTE_ITEM . '/:slug', function($slug) use ($app, $db) {
 		//on vérifie le cookie contenant les ids d'images déjà vues (c'est un tableau d'ids)
 		$seenImgsCookie = $app->getCookie('seen_item_ids');
 		if ($seenImgsCookie) {
@@ -44,24 +53,36 @@
 		if (!in_array($item['id'], $seenImgIds))
 			$seenImgIds[]= $item['id'];
 		$nextItemSlug = $db->getRandomItemSlug($seenImgIds);
-		
+
 		$app->setCookie('seen_item_ids', implode(';', $seenImgIds), time()+60*60*24*3);
 
-		$title = ($item['content-type'] == 'img-url' ? "Une image" : "Un truc").' qui fait arrêter de déprimer - Je déprime';
+		$title = ($item['content-type'] == 'img-url' ? "Une image" : "Un truc") . (APP_NAME == "jedepri" ?
+			" qui fait arrêter de déprimer - Je déprime" :
+			" qui te fait rigolay - J'ai rigolu");
 		$app->render('question.php', array(
-			'item' => $item, 
+			'item' => $item,
 			'nextItemSlug' => $nextItemSlug,
 			'twitterCard' => twitterCard($item),
 			'title' => $title
 		));
 	})->name('question');
 
-	$app->get('/toujours/', function() use ($app, $db) {
-		$app->redirect('/toujours/'.$db->getRandomItemSlug());
+	/**
+	 * 
+	 * 
+	 */
+	$app->get('/' . APP_ROUTE_ITEM . '/', function() use ($app, $db) {
+		$app->redirect('/' . APP_ROUTE_ITEM . '/'.$db->getRandomItemSlug());
 	})->name('question-empty');
 
-	$app->get('/plus/:slug', function($slug) use ($app, $db) {
-		$title = "J'ai arrêté ma dépression grâce à ".($item['content-type'] == 'img-url' ? "cette image" : "ce truc").' ! - Je déprime';
+	/**
+	 * partage
+	 * 
+	 */
+	$app->get('/' . APP_ROUTE_SHARE . '/:slug', function($slug) use ($app, $db) {
+		$title = APP_NAME == "jedepri" ?
+			"J'ai arrêté ma dépression grâce à ".($item['content-type'] == 'img-url' ? "cette image" : "ce truc").' ! - Je déprime' :
+			"J'ai rigolu trop méga fort en voyant ".($item['content-type'] == 'img-url' ? "cette image" : "ce truc").'.';
 		$app->render('partage.php', array(
 			'item' => $db->getItemBySlug($slug),
 			'twitterCard' => twitterCard($item),
@@ -69,23 +90,46 @@
 		));
 	})->name('partage');
 
-	$app->get('/plus/', function() use ($app, $db) {
+	/**
+	 * 
+	 * 
+	 */
+	$app->get('/' . APP_ROUTE_SHARE . '/', function() use ($app, $db) {
+		$title = APP_NAME == "jedepri" ?
+			"J'ai arrêté ma depression sur jedepri.me ! - Je déprime" :
+			"J'me suis roulé par terre et je le dis à toute la planète ! - J'ai rigolu'";
 		$app->render('partage.php', array(
-			"title" => "J'ai arrêté ma depression sur jedepri.me ! - Je déprime"
+			"title" => $title
 		));
 	})->name('partage-empty');
-	
+
+	/**
+	 * 
+	 * 
+	 */
 	$app->get('/updateImages', function() use($db) {
 		$db->fillDB();
 	})->name('updateImages');
 
+	/**
+	 * 
+	 * 
+	 */
 	$app->get('/random', function() use ($app, $db) {
-		echo HOST.'/toujours/'.$db->getRandomItemSlug();
+		echo HOST.'/' . APP_ROUTE_ITEM . '/'.$db->getRandomItemSlug();
 	});
 
+	/**
+	 * 
+	 * 
+	 */
 	$app->get('/:slug', function($slug) use($app) {
-		$app->redirect('/toujours/'.$slug, 301);
+		$app->redirect('/' . APP_ROUTE_ITEM . '/'.$slug, 301);
 	});
 
+	/**
+	 * 
+	 * 
+	 */
 	$app->run();
 ?>
