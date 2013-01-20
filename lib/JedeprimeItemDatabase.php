@@ -82,31 +82,20 @@ class JedeprimeItemDatabase {
 	}
 
 	/**
-	 * supprime les éléments de base de données : vieux cookies + vielles photos inactives
-	 * @param  array  $options 
-	 *         				since: les éléments plus vieux que le temps donné seront supprimés. 30 jours par défaut ("30 days")
-	 *         				cookies: supprime-t-on les vieux cookies ? oui par défaut
-	 *         				active: supprime-t-on les vieux items inactifs ? oui par défaut
+	 * supprime les vieux cookies de la bdd
+	 * @param  string $since les items vieux de x temps sont supprimés. "30 days" par défaut pour ceux créés il y a + de
+	 *                       30 jours
 	 */
-	public function cleanDB($options = array()) {
-		$options = $options + array('since' => "30 days", 'cookies' => true, 'active' => true);
-		$since = date('Y-m-d H:i:s', strtotime("-".$options['since']));
+	public function cleanDB($since = "30 days") {
+		$since = date('Y-m-d H:i:s', strtotime("-".$since));
 
-		if ($options['cookies']) {
-			$ids = array();
-			$query = "DELETE FROM jedeprime_cookies_ids WHERE cookie_id IN (
-						SELECT id FROM jedeprime_cookies WHERE created < \"".$since."\"
-					)";
-			$data = $this->db->exec($query);
-			$query = "DELETE FROM jedeprime_cookies WHERE created < \"".$since."\"";
-			$data = $this->db->exec($query);
-		}
-
-		if ($options['active']) {
-			$ids = array();
-			$query = "DELETE FROM ".$this->table." WHERE active=0 AND created < \"".$since."\"";
-			$data = $this->db->exec($query);
-		}
+		$ids = array();
+		$query = "DELETE FROM jedeprime_cookies_ids WHERE cookie_id IN (
+					SELECT id FROM jedeprime_cookies WHERE created < \"".$since."\"
+				)";
+		$data = $this->db->exec($query);
+		$query = "DELETE FROM jedeprime_cookies WHERE created < \"".$since."\"";
+		$data = $this->db->exec($query);
 	}
 
 	/**
