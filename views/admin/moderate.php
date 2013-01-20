@@ -14,6 +14,7 @@ foreach ($items as $key => $item): ?>
 		<?php if ($item['content-type'] == 'text'): ?>
 		<p class="item-text"><?php echo $item['content'] ?></p>
 		<?php endif ?>
+		<p><?php echo $item['source'] ?></p>
 	</div>
 	<br><br>
 <?php endforeach ?>
