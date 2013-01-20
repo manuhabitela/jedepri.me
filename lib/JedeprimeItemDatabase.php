@@ -125,7 +125,7 @@ class JedeprimeItemDatabase {
 	 */
 	public function getRandomItem($options = array()) {
 		$options = $options + array('select' => "*", 'except' => array(), 'exceptSources' => array(), 'weighted' => true);
-		$query = 'SELECT '.$options['select'].' from '.$this->table.' WHERE 1=1';
+		$query = 'SELECT '.$options['select'].' from '.$this->table.' WHERE active=1';
 		if (!empty($options['except'])) {
 			$query .= " AND id NOT IN (SELECT item_id FROM jedeprime_cookies_ids WHERE cookie_id = ".$options['except'].")";
 		}
