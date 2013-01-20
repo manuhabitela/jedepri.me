@@ -1,0 +1,16 @@
+{
+	"tumblr-photo": {
+		"http://bonjourlesgeeks.com":      [40],
+		"http://bonjourhumour.tumblr.com": [50]
+	},
+	"tumblr-regular": {
+		"http://quandmonchat.tumblr.com": [20, true]
+	},
+	"subreddit": {
+		"funny": [50, true],
+		"gif":   [60, true]
+	},
+	"vdm": {
+		"http://feeds.uri.lv/viedemerde": [30]
+	}
+}

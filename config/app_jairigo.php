@@ -8,4 +8,4 @@
 	define('APP_ROUTE_ITEM', 'enfinjessaie');
 	define('APP_ROUTE_SHARE', 'tresfort');
 
-	define('SOURCES_FILE', realpath('sources.json'));
+	define('SOURCES_FILE', realpath('sources_jairigo.json'));
