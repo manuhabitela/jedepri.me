@@ -104,10 +104,11 @@
 	})->name('partage-empty');
 
 	/**
-	 * 
-	 * 
+	 * maj de la base
+	 *
 	 */
 	$app->get('/updateImages', function() use($db) {
+		$db->cleanDB();
 		$db->fillDB();
 	})->name('updateImages');
 
