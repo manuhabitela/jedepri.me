@@ -41,20 +41,18 @@
 	 * 
 	 */
 	$app->get('/' . APP_ROUTE_ITEM . '/:slug', function($slug) use ($app, $db) {
-		//on vérifie le cookie contenant les ids d'images déjà vues (c'est un tableau d'ids)
+		$cookieId = null;
 		$seenImgsCookie = $app->getCookie('seen_item_ids');
-		if ($seenImgsCookie) {
-			$seenImgIds = array_filter(explode(';', htmlspecialchars($seenImgsCookie)));
-			$idsOk = true;
-			foreach ($seenImgIds as $id) { if (!is_numeric($id)) { $idsOk = false; break; } }
+		if ($seenImgsCookie && is_numeric($seenImgsCookie)) {
+			$cookieId = (int) $seenImgsCookie;
 		}
-		if (empty($seenImgIds) || empty($idsOk)) $seenImgIds = array();
 		$item = $db->getItemBySlug($slug);
-		if (!in_array($item['id'], $seenImgIds))
-			$seenImgIds[]= $item['id'];
-		$nextItemSlug = $db->getRandomItemSlug($seenImgIds);
+		$nextItemSlug = $db->getRandomItemSlug($cookieId);
 
-		$app->setCookie('seen_item_ids', implode(';', $seenImgIds), time()+60*60*24*3);
+		if ($cookieId == null)
+			$app->setCookie('seen_item_ids', $db->getNewCookieId(), time()+60*60*24*30);
+
+		$db->addSeenId($cookieId, $item['id']);
 
 		$title = ($item['content-type'] == 'img-url' ? "Une image" : "Un truc") . (APP_NAME == "jedepri" ?
 			" qui fait arrêter de déprimer - Je déprime" :

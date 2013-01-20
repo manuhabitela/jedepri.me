@@ -118,7 +118,7 @@ class JedeprimeItemDatabase {
 	 * choppe un truc au pif dans la base
 	 * @param  array  $options
 	 *         			"select" : champs a selectionner, tout par défaut ("*")
-	 *         			"except" : tableau d'ids à ne pas intégrer dans la recherche
+	 *         			"except" : id du cookie utilisateur (on retrouve les images déjà vues pour les exclure)
 	 *         			"exceptSources" : tableau de [type, source] à ne pas intégrer dans la recherce
 	 *         			"weighted": est-ce qu'on prend en compte le poids des sources ? oui par défaut
 	 * @return array      truc (image, ou citation genre vdm)
@@ -127,7 +127,7 @@ class JedeprimeItemDatabase {
 		$options = $options + array('select' => "*", 'except' => array(), 'exceptSources' => array(), 'weighted' => true);
 		$query = 'SELECT '.$options['select'].' from '.$this->table.' WHERE 1=1';
 		if (!empty($options['except'])) {
-			$query .= " AND id NOT IN (".implode(', ', array_filter($options['except'])).")";
+			$query .= " AND id NOT IN (SELECT item_id FROM jedeprime_seen_ids WHERE cookie_id = ".$options['except'].")";
 		}
 		if ($options['weighted'] && $filter = $this->_getNotSoRandomSource($options['exceptSources'])) {
 			$query .= " AND `source-type` = \"".addslashes($filter['type'])."\" AND source = \"".addslashes($filter['source'])."\"";
@@ -149,13 +149,13 @@ class JedeprimeItemDatabase {
 		return false;
 	}
 
-	public function getRandomItemId($not = array()) {
+	public function getRandomItemId($not = null) {
 		$item = $this->getRandomItem(array('select' => 'id', 'except' => $not));
 		if ($item) return $item['id'];
 		return false;
 	}
 
-	public function getRandomItemSlug($not = array()) {
+	public function getRandomItemSlug($not = null) {
 		$id = $this->getRandomItemId($not);
 		if ($id) return $this->getItemSlugById($id);
 		return false;
@@ -396,5 +396,16 @@ class JedeprimeItemDatabase {
 		while ($row = $q->fetch(PDO::FETCH_BOTH)) {
 			$this->db->exec('UPDATE '.$this->table.' SET hash = "'.md5($row['external-url'].$row['content']).'" where id='.$row['id']);
 		}
+	}
+
+	public function getNewCookieId() {
+		$q = $this->db->query('select MAX(cookie_id) as max from jedeprime_seen_ids');
+		$max = $q->fetch(PDO::FETCH_BOTH);
+		return $max['max']+1;
+	}
+
+	public function addSeenId($cookieId, $itemId) {
+		$query = 'INSERT INTO jedeprime_seen_ids(cookie_id, item_id) VALUES ('.$cookieId.', '.$itemId.') ON DUPLICATE KEY UPDATE cookie_id=cookie_id';
+		return $this->db->exec($query);
 	}
 }
