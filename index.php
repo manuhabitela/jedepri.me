@@ -1,4 +1,6 @@
 <?php
+	session_cache_limiter(false);
+	session_start();
 	/**
 	 * ce code est amicalement sponsorisé par la méthode rache
 	 */
@@ -118,6 +120,50 @@
 	});
 
 	/**
+	 * admin : login
+	 *
+	 */
+	$app->get('/admin', function() use($app) {
+		$app->render('admin/login.php');
+	});
+
+	$app->post('/admin', function() use($app) {
+		if (empty($_POST['word']))
+			return;
+
+		define('IM_COOL_BRO', 'yeah');
+		include('../php_config/jedepri.php');
+
+		$word = filter_input(INPUT_POST, 'word', FILTER_SANITIZE_SPECIAL_CHARS);
+		$_SESSION['isLogged'] = sha1($word) === MAGIC_WORD;
+
+		if ($_SESSION['isLogged'])
+			$app->redirect('/admin/moderate', 301);
+		else
+			$app->redirect('/admin', 301);
+	});
+
+	/**
+	 * admin : liste d'images
+	 *
+	 */
+	$app->get('/admin/moderate', function() use($app, $db) {
+		if (!$_SESSION['isLogged']) $app->redirect('/', 301);
+		$items = $db->getRandomItems(100);
+		$app->render('admin/moderate.php', array('items' => $items));
+	});
+
+	/**
+	 * admin : ban d'une image
+	 *
+	 */
+	$app->get('/admin/ban/:id', function($id) use($app, $db) {
+		if (!$_SESSION['isLogged']) $app->redirect('/', 301);
+		if (is_numeric($id)) {
+			$id = (int) $id;
+			$db->banItemById($id);
+		}
+	});
 	 * 
 	 * 
 	 */

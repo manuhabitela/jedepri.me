@@ -416,6 +416,26 @@ class JedeprimeItemDatabase {
 		$query = 'INSERT INTO jedeprime_cookies_ids(cookie_id, item_id) VALUES ('.$cookieId.', '.$itemId.') ON DUPLICATE KEY UPDATE cookie_id=cookie_id';
 		return $this->db->exec($query);
 	}
+
+	/**
+	 * récupère x items de la base au pif
+	 * @param  integer $limit nombre d'items à récupérer, 100 par défaut
+	 * @return array         tableau d'items
+	 */
+	public function getRandomItems($limit = 100) {
+		$items = array();
+		$query = "SELECT * FROM ".$this->table." WHERE active=1 ORDER BY RAND() LIMIT 0,".$limit;
+		$data = $this->db->query($query);
+		if ($data) {
+			while ($item = $data->fetch(PDO::FETCH_BOTH)) {
+				$items[]= $this->_item($item);
+			}
+		}
+		return $items;
+	}
+
+	public function banItemById($itemId) {
+		$query = "UPDATE ".$this->table." SET active=0 WHERE id=".$itemId;
 		return $this->db->exec($query);
 	}
 }
