@@ -349,7 +349,7 @@ class JedeprimeItemDatabase {
 		//avec les tumblr on passe par yql, ça semble mieux passer qu'en direct, bizarrement...
 		$checkMax = @simplexml_load_file("http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20xml%20where%20url%3D'".urlencode($tumblr.'/api/read?num=1')."'");
 		if ($checkMax) $max = (int) $checkMax->results->tumblr->posts['total']; //download allll the posts
-		$pages = floor($max/$num) > 10 ? 10 : floor($max/$num);
+		$pages = floor($max/$num) > 5 ? 5 : floor($max/$num);
 		if ($max < $num && $pages == 0) {
 			$pages = 1;
 			$num = $max;
@@ -375,7 +375,7 @@ class JedeprimeItemDatabase {
 	 */
 	protected function _insertSubreddit($subreddit, $options) {
 		$imgs = array();
-		for ($i=0; $i < 10; $i++) {
+		for ($i=0; $i < 2; $i++) {
 			$xml = @simplexml_load_file('http://imgur.com/r/'.$subreddit.'/top/page/'.$i.'.xml');
 			if ($xml) {
 				foreach ($xml->item as $item) {
@@ -393,7 +393,7 @@ class JedeprimeItemDatabase {
 	 */
 	protected function _insertImgurFilteredGallery($keyword, $options) {
 		$imgs = array();
-		for ($i=0; $i < 3; $i++) {
+		for ($i=0; $i < 2; $i++) {
 			$xml = @simplexml_load_file('http://imgur.com/gallery/page/'.$i.'.xml?q='.str_replace(' ', '+', $keyword));
 			if ($xml) {
 				foreach ($xml->item as $item) {
