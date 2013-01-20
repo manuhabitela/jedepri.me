@@ -8,7 +8,7 @@
  *   "subreddit": [{"funny": 50}]
  * }
  *
- * les types possibles sont actuellement : 
+ * les types possibles sont actuellement :
  * 		"tumblr-nomdutype" pour des sites tumblr. Si on veut ajouter un tumblr postant des photos, on note "tumblr-photo"
  * 			pour un tumblr avec des posts normaux, ca sera "tumblr-regular", etc... les types suivent les nom de l'api
  * 			c'est les urls des tumblr qu'on ajoute dans ce tableau
@@ -241,7 +241,7 @@ class JedeprimeItemDatabase {
 
 	/**
 	 * transforme un objet xml représentant une image sur tumblr en un tableau avec des attributs communs à toute image en base
-	 * @param  SimpleXMLElement $xml objet xml représentant l'image 
+	 * @param  SimpleXMLElement $xml objet xml représentant l'image
 	 * @return array tableau représentant l'image ayant une 'src', une 'url', un 'title', et le 'xml'
 	 */
 	protected function _tumblrImage($xml, $options) {
@@ -263,7 +263,7 @@ class JedeprimeItemDatabase {
 
 	/**
 	 * transforme un objet xml représentant une image sur imgur en un tableau avec des attributs communs à toute image en base
-	 * @param  SimpleXMLElement $xml objet xml représentant l'image 
+	 * @param  SimpleXMLElement $xml objet xml représentant l'image
 	 * @return array tableau représentant l'image ayant une 'src', une 'url', un 'title', et le 'xml'
 	 */
 	protected function _imgurImage($xml, $options) {
@@ -319,7 +319,7 @@ class JedeprimeItemDatabase {
 	 * insert des objets en base de données
 	 *
 	 * les objets déjà présents en base ne sont pas mis à jour
-	 * 	
+	 *
 	 * @param  array $items tableau d'objets
 	 * @return int nombre d'objets insérées
 	 */

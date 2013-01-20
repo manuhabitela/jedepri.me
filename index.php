@@ -31,7 +31,7 @@
 
 	/**
 	 * accueil
-	 * 
+	 *
 	 */
 	$app->get('/', function() use ($app, $db) {
 		$nextItemSlug = $db->getRandomItemSlug();
@@ -40,7 +40,7 @@
 
 	/**
 	 * image
-	 * 
+	 *
 	 */
 	$app->get('/' . APP_ROUTE_ITEM . '/:slug', function($slug) use ($app, $db) {
 		$cookieId = null;
@@ -68,8 +68,8 @@
 	})->name('question');
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 */
 	$app->get('/' . APP_ROUTE_ITEM . '/', function() use ($app, $db) {
 		$app->redirect('/' . APP_ROUTE_ITEM . '/'.$db->getRandomItemSlug());
@@ -77,7 +77,7 @@
 
 	/**
 	 * partage
-	 * 
+	 *
 	 */
 	$app->get('/' . APP_ROUTE_SHARE . '/:slug', function($slug) use ($app, $db) {
 		$title = APP_NAME == "jedepri" ?
@@ -91,8 +91,8 @@
 	})->name('partage');
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 */
 	$app->get('/' . APP_ROUTE_SHARE . '/', function() use ($app, $db) {
 		$title = APP_NAME == "jedepri" ?
@@ -113,8 +113,8 @@
 	})->name('updateImages');
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 */
 	$app->get('/random', function() use ($app, $db) {
 		echo HOST.'/' . APP_ROUTE_ITEM . '/'.$db->getRandomItemSlug();
@@ -165,16 +165,18 @@
 			$db->banItemById($id);
 		}
 	});
-	 * 
-	 * 
+
+	/**
+	 *
+	 *
 	 */
 	$app->get('/:slug', function($slug) use($app) {
 		$app->redirect('/' . APP_ROUTE_ITEM . '/'.$slug, 301);
 	});
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 */
 	$app->run();
 ?>
