@@ -50,7 +50,7 @@
 		$nextItemSlug = $db->getRandomItemSlug($cookieId);
 
 		if ($cookieId == null)
-			$app->setCookie('seen_item_ids', $db->getNewCookieId(), time()+60*60*24*30);
+			$app->setCookie('seen_item_ids', $db->createCookie(), time()+60*60*24*30);
 
 		$db->addSeenId($cookieId, $item['id']);
 

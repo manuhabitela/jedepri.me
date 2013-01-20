@@ -127,7 +127,7 @@ class JedeprimeItemDatabase {
 		$options = $options + array('select' => "*", 'except' => array(), 'exceptSources' => array(), 'weighted' => true);
 		$query = 'SELECT '.$options['select'].' from '.$this->table.' WHERE 1=1';
 		if (!empty($options['except'])) {
-			$query .= " AND id NOT IN (SELECT item_id FROM jedeprime_seen_ids WHERE cookie_id = ".$options['except'].")";
+			$query .= " AND id NOT IN (SELECT item_id FROM jedeprime_cookies_ids WHERE cookie_id = ".$options['except'].")";
 		}
 		if ($options['weighted'] && $filter = $this->_getNotSoRandomSource($options['exceptSources'])) {
 			$query .= " AND `source-type` = \"".addslashes($filter['type'])."\" AND source = \"".addslashes($filter['source'])."\"";
@@ -398,14 +398,24 @@ class JedeprimeItemDatabase {
 		}
 	}
 
-	public function getNewCookieId() {
-		$q = $this->db->query('select MAX(cookie_id) as max from jedeprime_seen_ids');
+
+	public function createCookie() {
+		$q = $this->db->query('select MAX(cookie_id) as max from jedeprime_cookies_ids');
 		$max = $q->fetch(PDO::FETCH_BOTH);
+		$q = $this->db->query('INSERT INTO jedeprime_cookies(id) VALUES ('.($max['max']+1).')');
+		$this->db->exec($q);
 		return $max['max']+1;
 	}
 
+	/**
+	 * marque l'item donné comme vu pour l'utilisateur représenté par le cookie donné
+	 * @param int $cookieId
+	 * @param int $itemId
+	 */
 	public function addSeenId($cookieId, $itemId) {
-		$query = 'INSERT INTO jedeprime_seen_ids(cookie_id, item_id) VALUES ('.$cookieId.', '.$itemId.') ON DUPLICATE KEY UPDATE cookie_id=cookie_id';
+		$query = 'INSERT INTO jedeprime_cookies_ids(cookie_id, item_id) VALUES ('.$cookieId.', '.$itemId.') ON DUPLICATE KEY UPDATE cookie_id=cookie_id';
+		return $this->db->exec($query);
+	}
 		return $this->db->exec($query);
 	}
 }
