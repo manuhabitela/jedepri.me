@@ -21,12 +21,18 @@
 		'templates.path' => './views',
 		'debug' => intval(!PROD)
 	));
-	define('HOST', $app->request()->getUrl());
+	define('HOST', $app->request()->getUrl());	
 
 	$app->hook('slim.before.dispatch', function() use ($app) {
 		$app->view()->appendData(array(
 			'app' => $app
 		));
+		$cookieId = getCookie($app);
+		if ($cookieId !== null) {
+			$app->view()->appendData(array(
+				'cookieId' => $cookieId
+			));
+		}
 	});
 
 	/**
@@ -36,6 +42,14 @@
 	$app->get('/', function() use ($app, $db) {
 		$nextItemSlug = $db->getRandomItemSlug();
 		$app->render(APP_NAME . '/question.php', array('simpleText' => true, 'nextItemSlug' => $nextItemSlug));
+
+		if (!empty($_GET['seeyouontheotherside'])) {
+			$givenCookieId = filter_input(INPUT_GET, 'seeyouontheotherside', FILTER_VALIDATE_INT);
+			if ($givenCookieId) {
+				$app->setCookie('seen_item_ids', $givenCookieId, time()+60*60*24*30);
+			}
+		}
+
 	})->name('home');
 
 	/**
@@ -43,14 +57,10 @@
 	 *
 	 */
 	$app->get('/' . APP_ROUTE_ITEM . '/:slug', function($slug) use ($app, $db) {
-		$cookieId = null;
-		$seenImgsCookie = $app->getCookie('seen_item_ids');
-		if ($seenImgsCookie && is_numeric($seenImgsCookie)) {
-			$cookieId = (int) $seenImgsCookie;
-		}
 		$item = $db->getItemBySlug($slug);
 		$nextItemSlug = $db->getRandomItemSlug($cookieId);
 
+		$cookieId = getCookie($app);
 		if ($cookieId == null)
 			$app->setCookie('seen_item_ids', $db->createCookie(), time()+60*60*24*30);
 
