@@ -450,6 +450,19 @@ class JedeprimeItemDatabase {
 		return $items;
 	}
 
+	public function getItemsFromSource($source, $active = 1) {
+		//select source, count(*) as c from jedeprime_items_dev where active=1 group by source order by c desc
+		$items = array();
+		$query = "SELECT * FROM ".$this->table." WHERE active=".$active." and source = \"".$source."\"";
+		$data = $this->db->query($query);
+		if ($data) {
+			while ($item = $data->fetch(PDO::FETCH_BOTH)) {
+				$items[]= $this->_item($item);
+			}
+		}
+		return $items;
+	}
+
 	public function banItemById($itemId) {
 		$query = "UPDATE ".$this->table." SET active=0 WHERE id=".$itemId;
 		return $this->db->exec($query);
@@ -460,4 +473,8 @@ class JedeprimeItemDatabase {
 		return $this->db->exec($query);
 	}
 
+	public function banItemsBySource($source) {
+		$query = "UPDATE ".$this->table." SET active=0 WHERE source = \"".$source."\"";
+		return $this->db->exec($query);
+	}
 }

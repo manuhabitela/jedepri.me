@@ -144,6 +144,12 @@
 			$app->redirect('/admin', 301);
 	});
 
+	$app->get('/admin/moderate_source/:active/', function($active) use($app, $db) {
+		if (!$_SESSION['isLogged']) $app->redirect('/', 301);
+		if (empty($_GET['source'])) return;
+		$items = $db->getItemsFromSource($_GET['source'], $active);
+		$app->render('admin/moderate.php', array('items' => $items));
+	});
 	/**
 	 * admin : liste d'images
 	 *
@@ -154,6 +160,7 @@
 		$app->render('admin/moderate.php', array('items' => $items));
 	});
 
+
 	/**
 	 * admin : ban d'une image
 	 *
@@ -163,6 +170,7 @@
 		if (is_numeric($id)) {
 			$id = (int) $id;
 			$db->banItemById($id);
+			echo "ok";
 		}
 	});
 
@@ -172,6 +180,12 @@
 			$id = (int) $id;
 			$db->unbanItemById($id);
 		}
+	});
+
+	$app->get('/admin/ban_source/', function() use($app, $db) {
+		if (!$_SESSION['isLogged']) $app->redirect('/', 301);
+		if (empty($_GET['source'])) return;
+		$db->banItemsBySource($_GET['source']);
 	});
 
 	/**
