@@ -419,8 +419,7 @@ class JedeprimeItemDatabase {
 	public function createCookie() {
 		$q = $this->db->query('select MAX(cookie_id) as max from jedeprime_cookies_ids');
 		$max = $q->fetch(PDO::FETCH_BOTH);
-		$q = $this->db->query('INSERT INTO jedeprime_cookies(id) VALUES ('.($max['max']+1).')');
-		$this->db->exec($q);
+		$this->db->exec('INSERT INTO jedeprime_cookies(id) VALUES ('.($max['max']+1).')');
 		return $max['max']+1;
 	}
 
