@@ -24,14 +24,10 @@
 	define('HOST', $app->request()->getUrl());	
 
 	$app->hook('slim.before.dispatch', function() use ($app) {
-		$app->view()->appendData(array(
-			'app' => $app
-		));
+		$app->view()->setData('app', $app);
 		$cookieId = getCookie($app);
 		if ($cookieId !== null) {
-			$app->view()->appendData(array(
-				'cookieId' => $cookieId
-			));
+			$app->view()->setData('cookieId', $cookieId);
 		}
 	});
 
@@ -41,15 +37,14 @@
 	 */
 	$app->get('/', function() use ($app, $db) {
 		$nextItemSlug = $db->getRandomItemSlug();
-		$app->render(APP_NAME . '/question.php', array('simpleText' => true, 'nextItemSlug' => $nextItemSlug));
-
 		if (!empty($_GET['seeyouontheotherside'])) {
 			$givenCookieId = filter_input(INPUT_GET, 'seeyouontheotherside', FILTER_VALIDATE_INT);
 			if ($givenCookieId) {
 				$app->setCookie('seen_item_ids', $givenCookieId, time()+60*60*24*30);
+				$app->view()->setData('cookieId', $givenCookieId);
 			}
 		}
-
+		$app->render(APP_NAME . '/question.php', array('simpleText' => true, 'nextItemSlug' => $nextItemSlug));
 	})->name('home');
 
 	/**
