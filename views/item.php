@@ -1,4 +1,4 @@
-<div id="item" class="<?php echo !empty($item) ? 'item-source-'.$item['source-type'].' item-content-'.$item['content-type'] : '' ?>">
+<div id="item" class="<?php echo !empty($item) ? 'item-source-'.$item['source-type'].' item-content-'.$item['content-type'] : '' ?>" <?php echo !empty($item) ? "data-hash=\"".$item['hash']."\"" : "" ?>>
 	<?php if (!empty($item)): ?>
 
 	<?php if (!empty($item['title'])): ?>
