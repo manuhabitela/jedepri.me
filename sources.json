@@ -16,8 +16,5 @@
 	},
 	"imgur-search": {
 		"hug": [50, true]
-	},
-	"vdm": {
-		"http://feeds.uri.lv/viedemerde": [20]
 	}
 }

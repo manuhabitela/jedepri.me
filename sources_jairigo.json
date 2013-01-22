@@ -8,8 +8,5 @@
 	"subreddit": {
 		"funny": [50, true],
 		"gif":   [60, true]
-	},
-	"vdm": {
-		"http://feeds.uri.lv/viedemerde": [10]
 	}
 }
