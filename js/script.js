@@ -140,8 +140,7 @@
 		}
 
 		if ( target && target.nodeName === 'A' && hasClass(target, 'toggle-view') ) {
-			window.history.go(-1);
-			preventDefault(event);
+			ajaxifyLink(e, target.href);
 		}
 
 		if ( target && target.nodeName === 'A' && hasClass(target, 'share-link') && hasClass(target, 'twitter') ) {

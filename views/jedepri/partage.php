@@ -27,7 +27,7 @@
 	<form action="#">
 		<textarea class="share-text"><?php echo $sharingSentence ?></textarea>
 	</form>
-
-	<a href="<?php echo $app->urlFor('home') ?>" class="toggle-view">Retour</a>
+	<?php $backUrl = !empty($item['slug']) ? $app->urlFor('question', array('slug' => $item['slug'])) : $app->urlFor('home'); ?>
+	<a href="<?php echo $backUrl ?>" class="toggle-view">Retour</a>
 </div>
 <?php if (!$app->request()->isAjax()) include(__DIR__ . '/../foot.php'); ?>
