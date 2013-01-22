@@ -166,6 +166,14 @@
 		}
 	});
 
+	$app->get('/admin/unban/:id', function($id) use($app, $db) {
+		if (!$_SESSION['isLogged']) $app->redirect('/', 301);
+		if (is_numeric($id)) {
+			$id = (int) $id;
+			$db->unbanItemById($id);
+		}
+	});
+
 	/**
 	 *
 	 *

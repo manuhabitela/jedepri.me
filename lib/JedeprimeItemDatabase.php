@@ -455,4 +455,10 @@ class JedeprimeItemDatabase {
 		$query = "UPDATE ".$this->table." SET active=0 WHERE id=".$itemId;
 		return $this->db->exec($query);
 	}
+
+	public function unbanItemById($itemId) {
+		$query = "UPDATE ".$this->table." SET active=1 WHERE id=".$itemId;
+		return $this->db->exec($query);
+	}
+
 }

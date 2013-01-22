@@ -2,7 +2,11 @@
 //VUE A L'ARRAAAAAACHE
 foreach ($items as $key => $item): ?>
 	<div id="<?php echo $item['id'] ?>">
+		<?php if ($item['active'] == 1): ?>
 		<button class="ban" data-id="<?php echo $item['id'] ?>">Bannir cet item</button>
+		<?php else: ?>
+		<button class="unban" data-id="<?php echo $item['id'] ?>">Accepter cet item</button>
+		<?php endif ?>
 		<?php if (!empty($items[$key+1])): ?>
 		<a href="#<?php echo $item['id'] ?>" class="ok">Ok</a>
 		<?php endif ?>
@@ -15,8 +19,8 @@ foreach ($items as $key => $item): ?>
 		<p class="item-text"><?php echo $item['content'] ?></p>
 		<?php endif ?>
 		<p><?php echo $item['source'] ?></p>
+		<br><br>
 	</div>
-	<br><br>
 <?php endforeach ?>
 <style type="text/css">
 	.item-img {
@@ -63,7 +67,16 @@ addEvent($$('.ban'), 'click', function(e) {
 	preventDefault(e);
 	microAjax('/admin/ban/' + e.target.getAttribute('data-id'), function(res) {
 		if (res.status == 200) {
-			e.target.parentNode.innerHTML = '';
+			e.target.parentNode.parentNode.removeChild(e.target.parentNode);
+		}
+	});
+});
+
+addEvent($$('.unban'), 'click', function(e) {
+	preventDefault(e);
+	microAjax('/admin/unban/' + e.target.getAttribute('data-id'), function(res) {
+		if (res.status == 200) {
+			e.target.parentNode.parentNode.removeChild(e.target.parentNode);
 		}
 	});
 });
