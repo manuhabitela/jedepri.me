@@ -3,13 +3,13 @@
 		"http://bonjourhumour.tumblr.com": [50]
 	},
 	"tumblr-regular": {
-		"http://quandmonchat.tumblr.com": [20, true]
+		"http://quandmonchat.tumblr.com": [10, true]
 	},
 	"subreddit": {
 		"funny": [50, true],
 		"gif":   [60, true]
 	},
 	"vdm": {
-		"http://feeds.uri.lv/viedemerde": [30]
+		"http://feeds.uri.lv/viedemerde": [10]
 	}
 }

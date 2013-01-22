@@ -1,15 +1,13 @@
 {
 	"tumblr-photo": {
 		"http://bonjourhamster.fr":        [20],
-		"http://dailybunny.tumblr.com":    [20],
-		"http://bonjourhumour.tumblr.com": [30],
-		"http://viktoria-f.tumblr.com":    [40],
-		"http://sexiestfoods.tumblr.com":  [40],
-		"http://veganfoody.tumblr.com":    [20],
+		"http://bonjourhumour.tumblr.com": [40],
+		"http://viktoria-f.tumblr.com":    [20],
+		"http://sexiestfoods.tumblr.com":  [30],
 		"http://jedeprime.tumblr.com":     [60]
 	},
 	"tumblr-regular": {
-		"http://quandmonchat.tumblr.com": [60, true]
+		"http://quandmonchat.tumblr.com": [30, true]
 	},
 	"subreddit": {
 		"funny": [70, true],
