@@ -10,8 +10,9 @@
 		<meta name="description" content="<?php echo !empty($description) ? $description : APP_TITLE ?>">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+		<link href="http://fonts.googleapis.com/css?family=Cabin" rel="stylesheet">
 		<!-- dev : /css/style.css -->
-		<?php $css = PROD ? '/css/style.min.css?v=957456120101' : '/css/style.css?v='.time() ?>
+		<?php $css = PROD ? '/css/style.min.css?v=957465612021901' : '/css/style.css?v='.time() ?>
 		<link rel="stylesheet" href="<?php echo $css ?>">
 
 		<?php if (!empty($twitterCard)): ?>

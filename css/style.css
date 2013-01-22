@@ -62,12 +62,14 @@ img {
 /*  jedeprime */
 body {
 	font-family: Georgia, serif;
+	font-family: Cabin, Helvetica, Arial, sans-serif;
 	text-align: center;
 	margin: 0 auto;
 	width: auto;
 	background: #f1f1f1 none repeat top left;
 	text-rendering: optimizeLegibility;
 	position: relative;
+	color: #000;
 }
 
 img {
@@ -100,16 +102,6 @@ a:active {
 	left: 0;
 }
 
-.title {
-	margin: 0;
-	font-size: 4em;
-	text-shadow: 0 1px 0 rgba(0, 0, 0, 0.8), 0 -1px 0 rgba(255, 255, 255, 1.0);
-}
-
-.title a {
-	color: inherit;
-}
-
 #content {
 	padding: 20px 0 0 0;
 }
@@ -124,22 +116,80 @@ a:active {
 .item-img {
 	box-shadow: 0 2px 20px -2px #777;
 	border: 1px solid #808080;
-	margin: 10px 0;
-}
-
-.item-title, .item-source a {
-	font-style: italic;
+	margin: 10px auto;
+	display: block;
 }
 
 .item-title {
-	margin: 0;
-	color: #222;
+	margin: 0 0 15px;
 	font-size: 1.1em;
+	padding: 6px 12px;
+	border-radius: 3px;
+	background: deeppink;
+	color: whiteSmoke;
+	position: relative;
+	display: inline-block;
+	min-width: 100px;
 }
 
-.item-source a {
-	color: #888;
+.item-title:after {
+	content: " ";
+	position: absolute;
+	display: block;
+	/*bottom: -8px;
+	left: 50%;
+	margin-left: -8px;
+	border-width: 8px 8px 0;*/
+	bottom: -15px;
+	left: 40px;
+	margin-left: 0;
+	border-width: 15px 0 0 15px;
+	border-style: solid;
+	border-color: deeppink transparent;
+	width: 0;
+}
+
+.item-title-orange  { background-color: #f50 ; }
+.item-title-orange:after { border-color: #f50 transparent; }
+.item-title-pink  { background-color: #ff1493 ; }
+.item-title-pink:after { border-color: #ff1493 transparent; }
+.item-title-blue  { background-color: #0af ; }
+.item-title-blue:after { border-color: #0af transparent; }
+.item-title-green  { background-color: #9d1 ; }
+.item-title-green:after { border-color: #9d1 transparent; }
+.item-title-purple  { background-color: #9C29E9 ; }
+.item-title-purple:after { border-color: #9C29E9 transparent; }
+
+.item-external-url {
+	font-size: .88em;
+}
+
+.item-title .item-external-url {
+	position: absolute;
+	bottom: -15px;
+	right: 0px;
+	line-height: 15px;
 	font-size: .8em;
+}
+
+.item-external-url a {
+	font-style: italic;
+	color: #888;
+}
+
+.title, a.reader-choice {
+	font-family: Cabin, Helvetica, Arial, sans-serif;
+	font-weight: bold;
+}
+
+.title {
+	margin: 0;
+	font-size: 4em;
+	text-shadow: 0 1px 0 rgba(0, 0, 0, 0.8), 0 -1px 0 rgba(255, 255, 255, 1.0);
+}
+
+.title a {
+	color: inherit;
 }
 
 a.reader-choice {
