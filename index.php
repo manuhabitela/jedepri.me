@@ -148,7 +148,7 @@
 		$_SESSION['isLogged'] = sha1($word) === MAGIC_WORD;
 
 		if ($_SESSION['isLogged'])
-			$app->redirect('/admin/moderate', 301);
+			$app->redirect('/admin/moderate_last', 301);
 		else
 			$app->redirect('/admin', 301);
 	});
@@ -166,6 +166,12 @@
 	$app->get('/admin/moderate', function() use($app, $db) {
 		if (!$_SESSION['isLogged']) $app->redirect('/', 301);
 		$items = $db->getRandomItems(100);
+		$app->render('admin/moderate.php', array('items' => $items));
+	});
+
+	$app->get('/admin/moderate_last', function() use($app, $db) {
+		if (!$_SESSION['isLogged']) $app->redirect('/', 301);
+		$items = $db->getItemsByDay(date('m'), date('d'), 0);
 		$app->render('admin/moderate.php', array('items' => $items));
 	});
 

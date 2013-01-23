@@ -463,6 +463,18 @@ class JedeprimeItemDatabase {
 		return $items;
 	}
 
+	public function getItemsByDay($month, $day, $active = 0) {
+		$items = array();
+		$query = "SELECT * FROM ".$this->table." WHERE month(created) = $month and day(created) = $day and active = $active";
+		$data = $this->db->query($query);
+		if ($data) {
+			while ($item = $data->fetch(PDO::FETCH_BOTH)) {
+				$items[]= $this->_item($item);
+			}
+		}
+		return $items;
+	}
+
 	public function banItemById($itemId) {
 		$query = "UPDATE ".$this->table." SET active=0 WHERE id=".$itemId;
 		return $this->db->exec($query);
