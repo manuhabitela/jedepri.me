@@ -146,7 +146,8 @@ class JedeprimeItemDatabase {
 		if (!empty($options['except'])) {
 			$query .= " AND id NOT IN (SELECT item_id FROM jedeprime_cookies_ids WHERE cookie_id = ".$options['except'].")";
 		}
-		if ($options['weighted'] && $filter = $this->_getNotSoRandomSource($options['exceptSources'])) {
+		$filter = $this->_getNotSoRandomSource($options['exceptSources']);
+		if ($options['weighted'] && $filter) {
 			$query .= " AND `source-type` = \"".addslashes($filter['type'])."\" AND source = \"".addslashes($filter['source'])."\"";
 		}
 		$query .= " ORDER BY RAND() LIMIT 0,1";
@@ -159,6 +160,10 @@ class JedeprimeItemDatabase {
 				if (!empty($filter)) { //on tente d'en trouver un avec un filtre sur type/source en moins
 					$options['exceptSources'][] = $filter;
 					return $this->getRandomItem($options);
+				}
+				if (!empty($options['except'])) { //tous les filtres sont passés et $filter est donc maintenant vide : on vide le cookie d'ids déjà vues et on recommence			
+					$this->clearCookieData($$options['except']);
+					return $this->getRandomItem(array('except' => $options['except']));
 				}
 				return $this->getRandomItem();
 			}
@@ -421,6 +426,12 @@ class JedeprimeItemDatabase {
 		$max = $q->fetch(PDO::FETCH_BOTH);
 		$this->db->exec('INSERT INTO jedeprime_cookies(id) VALUES ('.($max['max']+1).')');
 		return $max['max']+1;
+	}
+
+	public function clearCookieData($cookieId) {
+		if (!empty($cookieId))
+			return $this->db->exec('DELETE FROM jedeprime_cookies_ids WHERE cookie_id = '.(int) $cookieId);
+		return false;
 	}
 
 	/**
